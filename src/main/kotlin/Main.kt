@@ -7,7 +7,28 @@ fun main(args: Array<String>) {
     val client = serverSocket.accept()
     println("Client connected: ${client.inetAddress}")
 
-    val outputClient = client.getOutputStream()
-    outputClient.write("+PONG\r\n".toByteArray())
-    println("accepted new connection")
+    val reader = BufferedReader(InputStreamReader(client.getInputStream()))
+    val writer = OutputStreamWriter(client.getOutputStream())
+
+    // val command = reader.readLine()
+    // println("Received command: $command")
+
+    // writer.write("+PONG\r\n")
+    // writer.flush()
+    // client.close()
+
+    try {
+        var command = reader.readLine()
+        do {
+            if (command.trim().uppercase() == "PING") {
+                writer.write("+PONG\r\n")
+                writer.flush()
+            }
+            command = reader.readLine()
+        } while (command != null)
+     } catch (e: Exception) {
+            println("Error: $e")
+     } finally {
+          client.close()
+     }
 }
