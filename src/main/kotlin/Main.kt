@@ -45,7 +45,14 @@ fun handleClient(client : Socket) {
                     outputClient.write("+${requestParts[i]}\r\n".toByteArray())
                 }
             } else if (requestParts[0].uppercase() == Commands.SET.value) {
-                Storage.set(requestParts[1], requestParts[2])
+                var expire = 0
+
+                if(requestParts.size == 5 && requestParts[4].toIntOrNull() != null && requestParts[3] == "px") {
+                    expire = requestParts[4].toInt()
+                }
+
+
+                Storage.set(requestParts[1], requestParts[2], expire)
                 outputClient.write("+OK\r\n".toByteArray())
             } else if (requestParts[0].uppercase() == Commands.GET.value) {
                 val value = Storage.get(requestParts[1])
@@ -53,7 +60,7 @@ fun handleClient(client : Socket) {
                     outputClient.write("$-1\r\n".toByteArray())
                 } else {
                     outputClient.write("+$value\r\n".toByteArray())
-                } 
+                }
             }
 
             outputClient.flush()
