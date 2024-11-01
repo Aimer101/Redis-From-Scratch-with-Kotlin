@@ -13,7 +13,7 @@ object Storage {
                 override fun run() {
                     storage.remove(key)
                 }
-             }, expire)
+             }, expire.toLong())
         }
     }
 
