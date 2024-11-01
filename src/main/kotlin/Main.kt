@@ -150,9 +150,9 @@ fun getAllKeysMatchingPattern(pattern:String) : List<String> {
         FileInputStream(dpPath). use { fis ->
             // 1. read and verify header "REDIS0011"
             val header = ByteArray(9)
-            if (fis.read(header) != 9) return matchingKeys
+            if (fis.read(header) != 9) return@use matchingKeys
             val headerStr = String(header)
-            if (!headerStr.startsWith("REDIS")) return matchingKeys
+            if (!headerStr.startsWith("REDIS")) return@use matchingKeys
 
             var byteRead: Int
 

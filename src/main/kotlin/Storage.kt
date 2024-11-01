@@ -20,18 +20,4 @@ object Storage {
 
     fun get(key: String): String? = storage[key]
 
-    fun getAllMatchingKeys(pattern: String): List<String> {
-        val dbFilePath = helpers.getDbFilePath()
-        val matchingKeys = mutableListOf<String>()
-        val dbHeaderOpcode = 0xFE.toByte()
-
-        val regexPattern = pattern.replace("*", ".*").toRegex()
-
-        try {
-
-        } catch (e: IOException) {
-        println("Error while reading RDB file: $e")
-        }
-
-    }
 }
