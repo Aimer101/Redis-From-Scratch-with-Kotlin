@@ -29,10 +29,6 @@ fun handleClient(client : Socket) {
         val command = reader.readLine() ?: ""
         println("Received command: $command")
 
-        if(command.isEmpty()) {
-            break
-        }
-
         if (command.trim().uppercase() == "PING") {
             writer.write("+PONG\r\n")
             writer.flush()
