@@ -26,8 +26,12 @@ fun handleClient(client : Socket) {
     val writer = OutputStreamWriter(client.getOutputStream())
 
     try {
-        val command = reader.readLine()
+        val command = reader.readLine() ?: ""
         println("Received command: $command")
+
+        if(requestBody.isEmpty()) {
+            break
+        }
 
         if (command.trim().uppercase() == "PING") {
             writer.write("+PONG\r\n")
