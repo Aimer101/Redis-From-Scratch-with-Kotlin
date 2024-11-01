@@ -39,7 +39,7 @@ fun handleClient(client : Socket) {
                 outputClient.write("-ERR\r\n".toByteArray())
             } else if (requestParts[0].uppercase() == Commands.PING.value) {
                 outputClient.write("+PONG\r\n".toByteArray())
-            } else if (requestParts[0].uppercase == Commands.ECHO.value) {
+            } else if (requestParts[0].uppercase() == Commands.ECHO.value) {
                 for (i in 1 until requestParts.size) {
                     println(requestParts[i])
                     outputClient.write("+${requestParts[i]}\r\n".toByteArray())
