@@ -129,12 +129,12 @@ fun createRDBPersistence(args: Array<String>) {
     }
 
     // Create database file
-    val dbFilePath = Paths.get(dir, dbFilename)
+    val dbFilePath = Paths.get(dir, dbfilename)
     if (!Files.exists(dbFilePath)) {
         Files.createFile(dbFilePath)
-        println("Database file created: $dbFilePath")
+        println("Database file created: $dbfilename")
     } else {
-        println("Database file already exists: $dbFilePath")
+        println("Database file already exists: $dbfilename")
     }
 
 }
