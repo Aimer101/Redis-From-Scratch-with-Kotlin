@@ -19,26 +19,16 @@ fun main(args: Array<String>) {
 }
 
 fun handleClient(client : Socket) {
-    val reader = BufferedReader(InputStreamReader(client.getInputStream()))
-    val writer = OutputStreamWriter(client.getOutputStream())
+    val inputClient = client.getInputStream()
+    val outputClient = client.getOutputStream()
 
-    try {
-        while(client.isConnected) {
-            val command = reader.readLine() ?: ""
-            println("Command: $command")
-
-            if(command.isEmpty()) {
-                break
-            }
-    
-            writer.write("+PONG\r\n")
-            writer.flush()
+    while(client.isConnected) {
+        val request = inputClient.bufferedReader()
+        val requestBody = request.readLine() ?: ""
+        if(requestBody.isEmpty()) {
+            break
         }
-
-    } catch(e: Exception) {
-        println("Error: $e")
-    } finally {
-        client.close()
+        outputClient.write("+PONG\r\n".toByteArray())
+        outputClient.flush()
     }
-
 }
