@@ -8,9 +8,6 @@ fun main(args: Array<String>) {
     var serverSocket = ServerSocket(6379)
     println("Server started, waiting for connections...")
 
-    
-
-
     while (true) {
         val client = serverSocket.accept()
         println("Client connected: ${client.inetAddress}")
@@ -29,10 +26,8 @@ fun handleClient(client : Socket) {
         val command = reader.readLine()
         println("Command: $command")
 
-        // if (command.trim().uppercase() == "PING") {
-        writer.write("+PONG\r\n")
+        writer.write("+PONG\r\n".toByteArray())
         writer.flush()
-        // }
 
     } catch(e: Exception) {
         println("Error: $e")
