@@ -15,8 +15,8 @@ fun main(args: Array<String>) {
         }
     }
 
-    ServerConfig.set("DIR", dir)
-    ServerConfig.set("DBFILENAME", dbfilename)
+    ServerConfig.set("DIR", dir ?: "")
+    ServerConfig.set("DBFILENAME", dbfilename ?: "")
 
     var serverSocket = ServerSocket(6379)
     println("Server started, waiting for connections...")
