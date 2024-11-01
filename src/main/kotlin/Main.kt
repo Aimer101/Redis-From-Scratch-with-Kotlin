@@ -5,6 +5,19 @@ import java.io.OutputStreamWriter
 import java.net.Socket 
 
 fun main(args: Array<String>) {
+    var dir: String? = null
+    var dbfilename: String? = null
+
+    for(i in args.indices){
+        when(args[i]){
+            "--dir" -> dir = args[i + 1]
+            "--dbfilename" -> dbfilename = args[i + 1]
+        }
+    }
+
+    ServerConfig.set("DIR", dir)
+    ServerConfig.set("DBFILENAME", dbfilename)
+
     var serverSocket = ServerSocket(6379)
     println("Server started, waiting for connections...")
 
@@ -60,6 +73,17 @@ fun handleClient(client : Socket) {
                     outputClient.write("$-1\r\n".toByteArray())
                 } else {
                     outputClient.write("+$value\r\n".toByteArray())
+                }
+            } else if (requestParts[0].uppercase() == Commands.CONFIG.value) {
+                if (requestParts[1].uppercase() == "GET") {
+                    val arrSize = requestParts.size - 2
+                    outputClient.write("*${arrSize}\r\n".toByteArray())
+
+                    for (i in 2 until requestParts.size) {
+                        val value = ServerConfig.get(requestParts[i])
+                        outputClient.write("$${value.length}\r\n".toByteArray())
+                        outputClient.write("+${value}\r\n".toByteArray())
+                    }
                 }
             }
 
