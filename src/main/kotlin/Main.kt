@@ -75,12 +75,14 @@ fun handleClient(client : Socket) {
                     outputClient.write("+$value\r\n".toByteArray())
                 }
             } else if (requestParts[0].uppercase() == Commands.CONFIG.value) {
-                if (requestParts[1].uppercase() == "GET") {
+                if (requestParts[1].uppercase() == Commands.GET.value) {
                     val arrSize = requestParts.size - 2
-                    outputClient.write("*${arrSize}\r\n".toByteArray())
+                    outputClient.write("*${arrSize * 2}\r\n".toByteArray())
 
                     for (i in 2 until requestParts.size) {
-                        val value = ServerConfig.get(requestParts[i])
+                        outputClient.write("$${requestParts[i].length}\r\n".toByteArray())
+                        outputClient.write("+${requestParts[i].lowercase()}\r\n".toByteArray())
+                        val value : String = ServerConfig.get(requestParts[i]) ?: ""
                         outputClient.write("$${value.length}\r\n".toByteArray())
                         outputClient.write("+${value}\r\n".toByteArray())
                     }
