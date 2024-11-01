@@ -23,11 +23,17 @@ fun handleClient(client : Socket) {
     val writer = OutputStreamWriter(client.getOutputStream())
 
     try {
-        val command = reader.readLine()
-        println("Command: $command")
+        while(client.isConnected) {
+            val command = reader.readLine() ?: ""
+            println("Command: $command")
 
-        writer.write("+PONG\r\n".toByteArray())
-        writer.flush()
+            if(command.isEmpty()) {
+                break
+            }
+    
+            writer.write("+PONG\r\n")
+            writer.flush()
+        }
 
     } catch(e: Exception) {
         println("Error: $e")
