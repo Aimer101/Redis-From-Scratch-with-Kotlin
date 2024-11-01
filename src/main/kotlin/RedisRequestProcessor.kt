@@ -6,7 +6,7 @@ class RedisRequestProcessor {
         // *2\r\n$4\r\nECHO\r\n$9\r\nraspberry
         val parsedRequestParts = ArrayList<String>();
         if(request.startsWith(ASTERISK)){
-            val requestParts = request.split("\r\n")
+            var requestParts = request.split("\r\n")
             // [*2, $4, ECHO, $9, raspberry]
 
             // to get total args

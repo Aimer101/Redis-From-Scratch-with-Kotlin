@@ -46,9 +46,7 @@ fun handleClient(client : Socket) {
                 }
             }
 
-            output.flush()
-
-
+            outputClient.flush()
             // val request = inputClient.bufferedReader()
             // val requestBody = request.readLine() ?: ""
             // if(requestBody.isEmpty()) {
