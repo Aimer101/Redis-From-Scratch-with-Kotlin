@@ -29,7 +29,7 @@ fun handleClient(client : Socket) {
         val command = reader.readLine() ?: ""
         println("Received command: $command")
 
-        if(requestBody.isEmpty()) {
+        if(command.isEmpty()) {
             break
         }
 
