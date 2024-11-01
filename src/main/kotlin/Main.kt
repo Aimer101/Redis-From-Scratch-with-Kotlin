@@ -177,10 +177,10 @@ fun getAllKeysMatchingPattern(pattern:String) : List<String> {
                                 when (byteRead.toByte()) {
                                     0x00.toByte() -> { // type string
                                         val keyLength = fis.read()
-                                        if (keyLength == -1) return
+                                        if (keyLength == -1) return matchingKeys
 
                                         val keyBytes = ByteArray(keyLength)
-                                        if (fis.read(keyBytes) != keyLength) return
+                                        if (fis.read(keyBytes) != keyLength) return matchingKeys
 
                                         val key = String(keyBytes)
 
@@ -190,7 +190,7 @@ fun getAllKeysMatchingPattern(pattern:String) : List<String> {
 
                                         // Skip value
                                         val valueLength = fis.read()
-                                        if (valueLength == -1) return
+                                        if (valueLength == -1) return matchingKeys
                                         fis.skip(valueLength.toLong())
                                     }
 
