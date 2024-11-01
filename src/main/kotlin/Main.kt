@@ -146,8 +146,7 @@ fun getAllKeysMatchingPattern(pattern:String) : List<String> {
     val regexPattern = pattern.replace("*", ".*").toRegex()
 
     try {
-
-        FileInputStream(dpPath). use { fis ->
+        FileInputStream(dbPath).use { fis ->
             // 1. read and verify header "REDIS0011"
             val header = ByteArray(9)
             if (fis.read(header) != 9) return@use matchingKeys
