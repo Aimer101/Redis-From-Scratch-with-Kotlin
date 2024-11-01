@@ -7,31 +7,36 @@ fun main(args: Array<String>) {
     var serverSocket = ServerSocket(6379)
     println("Server started, waiting for connections...")
 
-    val client = serverSocket.accept()
-    println("Client connected: ${client.inetAddress}")
+    
 
+
+    while (true) {
+        val client = serverSocket.accept()
+        println("Client connected: ${client.inetAddress}")
+
+        Thread {
+            handleClient(client)
+        }.start()
+    }
+}
+
+fun handleClient(client : Socket) {
     val reader = BufferedReader(InputStreamReader(client.getInputStream()))
     val writer = OutputStreamWriter(client.getOutputStream())
 
-    // val command = reader.readLine()
-    // println("Received command: $command")
-
-    // writer.write("+PONG\r\n")
-    // writer.flush()
-    // client.close()
-
     try {
-        var command = reader.readLine()
-        do {
-            if (command.trim().uppercase() == "PING") {
-                writer.write("+PONG\r\n")
-                writer.flush()
-            }
-            command = reader.readLine()
-        } while (command != null)
-     } catch (e: Exception) {
-            println("Error: $e")
-     } finally {
-          client.close()
-     }
+        val command = reader.readLine()
+        println("Received command: $command")
+
+        if (command.trim().uppercase() == "PING") {
+            writer.write("+PONG\r\n")
+            writer.flush()
+        }
+
+    } catch(e: Exception) {
+        println("Error: $e")
+    } finally {
+        client.close()
+    }
+
 }
