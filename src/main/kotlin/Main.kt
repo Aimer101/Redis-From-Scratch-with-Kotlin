@@ -82,7 +82,7 @@ fun handleClient(client : Socket) {
                     }
                 }
             } else if (requestParts[0].uppercase() == Commands.KEYS.value) {
-                val listOfKeys = getAllKeysMatchingPattern(commandList[1])
+                val listOfKeys = getAllKeysMatchingPattern(requestParts[1])
 
                 outputClient.write("*${listOfKeys.size}\r\n".toByteArray())
 
@@ -165,7 +165,7 @@ fun getAllKeysMatchingPattern(pattern:String) : List<String> {
                         val valueLength = fis.read() // read value length
                         fis.skip(valueLength.toLong()) // skip - The value of the metadata attribute (string encoded): "6.0.16".
                     }
-                    0XFE.toByte {
+                    0XFE.toByte() -> {
                         val dbIndex = fis.read() // read database index
 
                         val marker = fis.read() //read hashtable info
@@ -195,11 +195,11 @@ fun getAllKeysMatchingPattern(pattern:String) : List<String> {
                                         fis.skip(valueLength.toLong())
                                     }
 
-                                    0xFC -> { // has an expiry timestamp (ms in Unix time, stored as an 8-byte unsigned long, in Little Endian order)
+                                    0xFC.toByte() -> { // has an expiry timestamp (ms in Unix time, stored as an 8-byte unsigned long, in Little Endian order)
                                         fis.skip(8)  // Skip timestamp
                                     }
 
-                                    0xFD -> { // has an expiry timestamp (seconds in Unix time stored as an 4-byte unsigned integer)
+                                    0xFD.toByte() -> { // has an expiry timestamp (seconds in Unix time stored as an 4-byte unsigned integer)
                                         fis.skip(4)
                                     }
                                 }
