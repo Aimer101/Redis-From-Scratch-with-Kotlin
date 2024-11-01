@@ -37,27 +37,32 @@ fun handleClient(client : Socket) {
             System.out.println("requestParts size: " + requestParts.size)
             if(requestParts.isEmpty()) {
                 outputClient.write("-ERR\r\n".toByteArray())
-            } else if (requestParts[0] == "PING") {
+            } else if (requestParts[0].uppercase() == Commands.PING.value) {
                 outputClient.write("+PONG\r\n".toByteArray())
-            } else if (requestParts[0] == "ECHO") {
+            } else if (requestParts[0].uppercase == Commands.ECHO.value) {
                 for (i in 1 until requestParts.size) {
                     println(requestParts[i])
                     outputClient.write("+${requestParts[i]}\r\n".toByteArray())
                 }
+            } else if (requestParts[0].uppercase() == Commands.SET.value) {
+                Storage.set(requestParts[1], requestParts[2])
+                outputClient.write("+OK\r\n".toByteArray())
+            } else if (requestParts[0].uppercase() == Commands.GET.value) {
+                val value = Storage.get(requestParts[1])
+                if (value == null) {
+                    outputClient.write("$-1\r\n".toByteArray())
+                } else {
+                    outputClient.write("+$value\r\n".toByteArray())
+                } 
             }
 
             outputClient.flush()
-            // val request = inputClient.bufferedReader()
-            // val requestBody = request.readLine() ?: ""
-            // if(requestBody.isEmpty()) {
-            //     break
-            // }
-            // outputClient.write("+PONG\r\n".toByteArray())
         }
     } catch (e: Exception) {
         println("Error handling client: ${e.message}")
     } finally {
         inputClient.close()
         outputClient.close()
+        client.close()
     }
 }
