@@ -26,13 +26,13 @@ fun handleClient(client : Socket) {
     val writer = OutputStreamWriter(client.getOutputStream())
 
     try {
-        val command = reader.readLine() ?: ""
-        println("Received command: $command")
+        val command = reader.readLine()
+        println("Command: $command")
 
-        if (command.trim().uppercase() == "PING") {
-            writer.write("+PONG\r\n")
-            writer.flush()
-        }
+        // if (command.trim().uppercase() == "PING") {
+        writer.write("+PONG\r\n")
+        writer.flush()
+        // }
 
     } catch(e: Exception) {
         println("Error: $e")
