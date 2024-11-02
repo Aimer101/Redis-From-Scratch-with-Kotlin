@@ -110,7 +110,7 @@ class Connection {
 
                     val message = "$" + rdbBytes.size + "\r\n" + String(rdbBytes, Charsets.ISO_8859_1)
                     
-                    outputClient.write(message)
+                    outputClient.write(message.toByteArray(Charsets.ISO_8859_1))
                     outputClient.flush()
                 }
             }
