@@ -35,4 +35,11 @@ class ReplicaClient (private val host : String, private val port : Int) {
         response = request.readLine()
         println("Response from master for replconf 2: $response")
     }
+
+    fun psync() {
+        println("Sending psync to master")
+        outputClient.print("*3\r\n$5\r\nPSYNC\r\n$1\r\n?\r\n$2\r\n-1\r\n")
+        outputClient.flush()
+        println("Psync sent to master")
+    }
 }
