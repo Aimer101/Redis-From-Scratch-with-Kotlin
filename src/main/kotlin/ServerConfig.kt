@@ -1,9 +1,11 @@
+import java.nio.file.Paths
+
 object ServerConfig {
 
-    var dir: String? = null
-    var dbfilename: String? = null
+    var dir: String = "/tmp/redis-files"
+    var dbfilename: String = "dump.rdb"
 
-    fun get(key: String): String? {
+    fun get(key: String): String {
         return when(key.uppercase()){
             "DIR" -> dir
             "DBFILENAME" -> dbfilename
@@ -16,5 +18,11 @@ object ServerConfig {
             "DIR" -> dir = value
             "DBFILENAME" -> dbfilename = value
         }
+    }
+
+    fun getDbFilePath(): String {
+        val dbFilePath = Paths.get(dir, dbFilename).toString()
+
+        return dbFilePath
     }
 }

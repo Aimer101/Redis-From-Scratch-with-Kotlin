@@ -4,5 +4,6 @@ enum class Commands(val value: String) {
     PING("PING"),
     ECHO("ECHO"),
     CONFIG("CONFIG"),
-    KEYS("KEYS")
+    KEYS("KEYS"),
+    SAVE("SAVE")
 }
