@@ -7,8 +7,8 @@ object DBConfig {
     var isConfigured = false
     var networkPort = 6379
     var master : Master? = null
-    val masterReplicationId: String = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
-    val masterReplicationOffset: Int = 0
+    val masterReplId: String = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
+    val masterReplOffset: Int = 0
 
     fun get(key: String): String {
         return when(key.uppercase()){
@@ -53,18 +53,18 @@ object DBConfig {
         return "role:$role"
     }
 
-    fun getMasterReplicationId(): String {
-        return "master_replid:${this.masterReplicationId}"
+    fun getMasterReplId(): String {
+        return "master_replid:${this.masterReplId}"
     }
 
-    fun getMasterReplicationOffset(): String {
-        return "master_repl_offset:${this.masterReplicationOffset}"
+    fun getMasterReplOffset(): String {
+        return "master_repl_offset:${this.masterReplOffset}"
     }
 }
 
 data class Master(
     val host: String, 
     val port: Int, 
-    val masterReplicationId: String = "", 
-    val masterReplicationOffset: Int = 0
+    val masterReplId: String = "", 
+    val masterReplOffset: Int = 0
 )
