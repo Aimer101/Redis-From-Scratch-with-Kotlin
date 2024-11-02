@@ -20,7 +20,7 @@ class ReplicaClient (private val host : String, private val port : Int) {
 
     fun replconf() {
         println("Sending replconf 1 to master")
-        outputClient.print("*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$${port.toString().length}\r\${port}\r\n")
+        outputClient.print("*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$${port.toString().length}\r\n${port}\r\n")
         outputClient.flush()
         println("Replconf 1 sent to master")
 
