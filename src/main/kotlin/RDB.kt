@@ -75,16 +75,18 @@ class RDB {
         return true
     }
 
-    private fun handleSkip(fis: FileInputStream) {
+    private fun handleSkip(fis: FileInputStream) : Boolean {
         val keyLength = fis.read()
-        if (keyLength == -1) break
+        if (keyLength == -1) return false
 
         fis.skip(keyLength.toLong())
 
         val valueLength = fis.read()
-        if (valueLength == -1) break
+        if (valueLength == -1) return false
 
         fis.skip(valueLength.toLong())
+
+        return true
     }
 
     fun getAllKeysMatchingPattern(pattern: String): List<String> {
@@ -177,7 +179,9 @@ class RDB {
 
                                     // Check if the key is expired
                                     if (System.currentTimeMillis() > expiryTimestamp) {
-                                        handleSkip(fis)
+                                        if(!handleSkip(fis)) {
+                                            break
+                                        }
                                     }
                                 }
                                 EXPIRY_IN_S -> {
@@ -187,7 +191,9 @@ class RDB {
 
                                     // Check if the key is expired
                                     if (System.currentTimeMillis() > expiryTimestamp) {
-                                        handleSkip(fis)
+                                        if(!handleSkip(fis)) {
+                                            break
+                                        }
                                     }
                                 }
                             }
