@@ -91,7 +91,7 @@ class Connection {
                         outputClient.write("$${dbReplId.length}\r\n".toByteArray())
                         outputClient.write("${dbReplId}\r\n".toByteArray())
 
-                        val dbReplOffset = DBConfig.masterReplOffset()
+                        val dbReplOffset = DBConfig.getMasterReplOffset()
                         outputClient.write("$${dbReplOffset.length}\r\n".toByteArray())
                         outputClient.write("${dbReplOffset}\r\n".toByteArray())
                     } else {
