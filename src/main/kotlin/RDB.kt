@@ -75,6 +75,18 @@ class RDB {
         return true
     }
 
+    private fun handleSkip(fis: FileInputStream) {
+        val keyLength = fis.read()
+        if (keyLength == -1) break
+
+        fis.skip(keyLength.toLong())
+
+        val valueLength = fis.read()
+        if (valueLength == -1) break
+
+        fis.skip(valueLength.toLong())
+    }
+
     fun getAllKeysMatchingPattern(pattern: String): List<String> {
         val dbPath = DBConfig.getDbFilePath()
         val matchingKeys= mutableListOf<String>()
@@ -109,7 +121,6 @@ class RDB {
                                     fis.skip(4) // Skip the 4-byte expiry timestamp
                                 }
                             }
-
                         }
                     }
                 }
@@ -160,10 +171,24 @@ class RDB {
                                     fis.skip(valueLength.toLong())
                                 }
                                 EXPIRY_IN_MS -> {
-                                    fis.skip(8) // Skip the 8-byte expiry timestamp
+                                    val expiryBytes = ByteArray(8)
+                                    if (fis.read(expiryBytes) != 8) break
+                                    val expiryTimestamp = expiryBytes.toLittleEndianLong()
+
+                                    // Check if the key is expired
+                                    if (System.currentTimeMillis() > expiryTimestamp) {
+                                        handleSkip(fis)
+                                    }
                                 }
                                 EXPIRY_IN_S -> {
-                                    fis.skip(4) // Skip the 4-byte expiry timestamp
+                                    val expiryBytes = ByteArray(4)
+                                    if (fis.read(expiryBytes) != 4) break
+                                    val expiryTimestamp = expiryBytes.toLittleEndianInt().toLong() * 1000
+
+                                    // Check if the key is expired
+                                    if (System.currentTimeMillis() > expiryTimestamp) {
+                                        handleSkip(fis)
+                                    }
                                 }
                             }
                         }
