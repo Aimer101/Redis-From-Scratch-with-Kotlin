@@ -40,7 +40,7 @@ class Connection {
                     outputClient.write("+OK\r\n".toByteArray())
                 } else if (requestParts[0].uppercase() == Commands.GET.value) {
                     println( "Command is get:"+ requestParts[1])
-                    val res : String? = null
+                    var res : String? = null
 
                     if(DBConfig.isConfigured) {
                         res = RDB().getValue(requestParts[1])
