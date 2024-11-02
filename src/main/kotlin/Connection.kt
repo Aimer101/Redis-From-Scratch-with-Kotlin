@@ -83,21 +83,6 @@ class Connection {
                     }
                 } else if (requestParts[0].uppercase() == Command.INFO.value) {
                     if(requestParts[1].uppercase() == ArgCommand.REPLICATION.value) {
-                        // val dbRole = DBConfig.getRoleInfo()
-                        // outputClient.write("$${dbRole.length}\r\n".toByteArray())
-                        // outputClient.write("${dbRole}\r\n".toByteArray())
-                        // println("dbRole: $dbRole")
-
-                        // val dbReplId = DBConfig.getMasterReplIdInfo()
-                        // outputClient.write("$${dbReplId.length}\r\n".toByteArray())
-                        // outputClient.write("${dbReplId}\r\n".toByteArray())
-                        // println("dbReplId: $dbReplId")
-
-                        // val dbReplOffset = DBConfig.getMasterReplOffsetInfo()
-                        // outputClient.write("$${dbReplOffset.length}\r\n".toByteArray())
-                        // outputClient.write("${dbReplOffset}\r\n".toByteArray())
-                        // println("dbReplOffset: $dbReplOffset")
-
                         val response = DBConfig.getInfo()
 
                         outputClient.write("$${response.length}\r\n".toByteArray())
@@ -111,6 +96,8 @@ class Connection {
                     }
                 } else if (requestParts[0].uppercase() == Command.REPLCONF.value) {
                     outputClient.write("+OK\r\n".toByteArray())
+                } else if (requestParts[0].uppercase() == Command.PSYNC.value) {
+                    outputClient.write("+FULLRESYNC ${DBConfig.masterReplId} 0\r\n".toByteArray())
                 }
 
                 outputClient.flush()
