@@ -40,6 +40,9 @@ class Connection {
 
                     Storage.set(requestParts[1], requestParts[2], expiry)
                     outputClient.write("+OK\r\n".toByteArray())
+
+                    // send to replica
+                    ReplicaSocket.set(requestParts[1], requestParts[2], expiry)
                 } else if (requestParts[0].uppercase() == Command.GET.value) {
                     println( "Command is get:"+ requestParts[1])
                     println( "is db configured :"+ DBConfig.isConfigured)
@@ -89,10 +92,10 @@ class Connection {
 
                         outputClient.write("$${response.length}\r\n".toByteArray())
                         outputClient.write("$response\r\n".toByteArray())
-                        
+
                         // Debug prints for verification
                         println("Combined response:\n$response")
-                        
+
                     } else {
                         outputClient.write("$-1\r\n".toByteArray())
                     }
@@ -101,6 +104,7 @@ class Connection {
                 } else if (requestParts[0].uppercase() == Command.PSYNC.value) {
                     outputClient.write("+FULLRESYNC ${DBConfig.masterReplId} 0\r\n".toByteArray())
                     sendEmptyRDB = true
+                    ReplicaSocket.addSocket(socket)
                 }
 
                 outputClient.flush()
