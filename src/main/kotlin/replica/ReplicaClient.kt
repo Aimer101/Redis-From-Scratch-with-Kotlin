@@ -15,6 +15,26 @@ class ReplicaClient (host : String, port : Int) {
 
         val request = BufferedReader(InputStreamReader(socket.getInputStream()))
         val response = request.readLine()
-        println("Response from master: $response")
+        println("Response from master for ping: $response")
+    }
+
+    fun replconf() {
+        println("Sending replconf 1 to master")
+        outputClient.print("*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n${port.length}\r\${port}\r\n")
+        outputClient.flush()
+        println("Replconf 1 sent to master")
+
+        val request = BufferedReader(InputStreamReader(socket.getInputStream()))
+        val response = request.readLine()
+        println("Response from master for replconf 1: $response")
+
+        println("Sending replconf 2 to master")
+        outputClient.print("*3\r\n$8\r\nREPLCONF\r\n$4\r\ncapa\r\n$6\r\npsync2\r\n")
+        outputClient.flush()
+        println("Replconf 2 sent to master")
+
+        request = BufferedReader(InputStreamReader(socket.getInputStream()))
+        response = request.readLine()
+        println("Response from master for replconf 2: $response")
     }
 }

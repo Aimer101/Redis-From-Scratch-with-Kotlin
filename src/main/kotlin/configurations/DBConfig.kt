@@ -42,6 +42,7 @@ object DBConfig {
         this.master = Master(masterHost, masterPort)
         val replicaClient = ReplicaClient(masterHost, masterPort)
         replicaClient.ping()
+        replicaClient.replconf()
     }
 
     fun getDbFilePath(): String {
