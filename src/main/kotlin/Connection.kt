@@ -39,13 +39,23 @@ class Connection {
                     Storage.set(requestParts[1], requestParts[2], expiry)
                     outputClient.write("+OK\r\n".toByteArray())
                 } else if (requestParts[0].uppercase() == Commands.GET.value) {
-                    val value = Storage.get(requestParts[1])
+                    // val value = Storage.get(requestParts[1])
 
-                    if(value == null) {
+                    // if(value == null) {
+                    //     outputClient.write("$-1\r\n".toByteArray())
+                    // } else {
+                    //     outputClient.write("+$value\r\n".toByteArray())
+
+                    // }
+                    println( "Command is get:"+ requestParts[1] )
+                    val res : String? = RDB().getValue(requestParts[1])
+                    println( "res is: $res")
+
+                    if(res == null) {
                         outputClient.write("$-1\r\n".toByteArray())
                     } else {
-                        outputClient.write("+$value\r\n".toByteArray())
-
+                        outputClient.write("$${res.length}\r\n".toByteArray())
+                        outputClient.write("${res}\r\n".toByteArray())
                     }
                 } else if (requestParts[0].uppercase() == Commands.CONFIG.value) {
                     if (requestParts[1].uppercase() == Commands.GET.value) {
@@ -73,17 +83,6 @@ class Connection {
                         outputClient.write("$${key.length}\r\n".toByteArray())
                         outputClient.write("${key}\r\n".toByteArray())
                     }
-                } else if (requestParts[0].uppercase() == Commands.GET.value) {
-                    println( "Command is get:"+ requestParts[1] )
-                    val res : String? = RDB().getValue(requestParts[1])
-                    println( "res is: $res")
-
-                    if(res == null) {
-                        outputClient.write("$-1\r\n".toByteArray())
-                    } else {
-                        outputClient.write("$${res.length}\r\n".toByteArray())
-                        outputClient.write("${res}\r\n".toByteArray())
-                    }
                 }
 
                 outputClient.flush()
@@ -95,6 +94,5 @@ class Connection {
             outputClient.close()
             socket.close()
         }
-        
     }
 }
