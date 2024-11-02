@@ -26,6 +26,11 @@ class RDB {
                 "--dir" -> dir = args[i + 1]
                 "--dbfilename" -> dbfilename = args[i + 1]
                 "--port" -> networkPort = args[i+1].toInt()
+                "--replicaof" -> {
+                    val masterHost = args[i + 1]
+                    val masterPort = args[i + 2].toInt()
+                    DBConfig.setMaster(masterHost, masterPort)
+                }
             }
         }
 
