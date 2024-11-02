@@ -7,8 +7,7 @@ class ReplicaClient (host : String, port : Int) {
 
     fun ping () {
         println("Sending ping to master")
-        outputClient.print("*1\r\n$4\r\nPING\r\n")
-        outputClient.flush()
+        outputClient.println("*1\r\n$4\r\nPING\r\n")
         println("Ping sent to master")
     }
 }
