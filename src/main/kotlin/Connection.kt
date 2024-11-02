@@ -86,14 +86,18 @@ class Connection {
                         val dbRole = DBConfig.getRoleInfo()
                         outputClient.write("$${dbRole.length}\r\n".toByteArray())
                         outputClient.write("${dbRole}\r\n".toByteArray())
+                        println("dbRole: $dbRole")
 
                         val dbReplId = DBConfig.getMasterReplIdInfo()
                         outputClient.write("$${dbReplId.length}\r\n".toByteArray())
                         outputClient.write("${dbReplId}\r\n".toByteArray())
+                        println("dbReplId: $dbReplId")
 
                         val dbReplOffset = DBConfig.getMasterReplOffsetInfo()
                         outputClient.write("$${dbReplOffset.length}\r\n".toByteArray())
                         outputClient.write("${dbReplOffset}\r\n".toByteArray())
+                        println("dbReplOffset: $dbReplOffset")
+                        
                     } else {
                         outputClient.write("$-1\r\n".toByteArray())
                     }
