@@ -42,7 +42,7 @@ class ReplicaClient (private val host : String, private val port : Int) {
         outputClient.flush()
         println("Psync sent to master")
 
-        response = request.readLine()
+        val response = request.readLine()
         println("Response from master for psync: $response")
     }
 }
