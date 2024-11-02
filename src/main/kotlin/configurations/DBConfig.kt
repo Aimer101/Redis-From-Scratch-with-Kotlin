@@ -4,7 +4,7 @@ object DBConfig {
 
     var dir: String = "/tmp/redis-files"
     var dbfilename: String = "dump.rdb"
-    var port = 6379
+    var networkPort = 6379
     var isConfigured = false
 
     fun get(key: String): String {
@@ -31,8 +31,8 @@ object DBConfig {
         }
     }
 
-    fun setPort(port: Int) {
-        this.port = port
+    fun setPort(networkPort: Int) {
+        this.networkPort = networkPort
     }
 
     fun getDbFilePath(): String {

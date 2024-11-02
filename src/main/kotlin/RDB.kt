@@ -19,13 +19,13 @@ class RDB {
     fun createPersistence(args : Array<String>) {
         var dir: String? = null
         var dbfilename: String? = null
-        var port = 6379
+        var networkPort = 6379
 
         for(i in args.indices){
             when(args[i]){
                 "--dir" -> dir = args[i + 1]
                 "--dbfilename" -> dbfilename = args[i + 1]
-                "--port" -> port = args[i+1].toInt()
+                "--port" -> networkPort = args[i+1].toInt()
             }
         }
 
@@ -55,7 +55,7 @@ class RDB {
             }
         }
 
-        DBConfig.setPort(port)
+        DBConfig.setPort(networkPort)
 
     }
 
