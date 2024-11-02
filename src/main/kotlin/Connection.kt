@@ -20,6 +20,8 @@ class Connection {
                 val requestParts = RedisRequestProcessor().processRequest(request)
                 println("requestParts size: " + requestParts.size)
 
+                var sendEmptyRDB = false
+
                 if(requestParts.isEmpty()) {
                     outputClient.write("-ERR\r\n".toByteArray())
                 } else if (requestParts[0].uppercase() == Command.PING.value) {
@@ -98,9 +100,19 @@ class Connection {
                     outputClient.write("+OK\r\n".toByteArray())
                 } else if (requestParts[0].uppercase() == Command.PSYNC.value) {
                     outputClient.write("+FULLRESYNC ${DBConfig.masterReplId} 0\r\n".toByteArray())
+                    sendEmptyRDB = true
                 }
 
                 outputClient.flush()
+
+                if(sendEmptyRDB) {
+                    val byteArrayContents = RDB.EMPTY_RDB.decodeHexArray()
+
+                    val length = byteArrayContents.size
+                    
+                    outputClient.write("$${length}\r\n${String(byteArrayContents)}".toByteArray())
+                    outputClient.flush()
+                }
             }
         } catch (e: Exception) {
             println("Error handling client: ${e.message}")
