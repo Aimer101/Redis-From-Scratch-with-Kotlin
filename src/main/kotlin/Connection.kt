@@ -106,11 +106,11 @@ class Connection {
                 outputClient.flush()
 
                 if(sendEmptyRDB) {
-                    val byteArrayContents = RDB.EMPTY_RDB.decodeHexArray()
+                    val rdbBytes = RDB.EMPTY_RDB.decodeHexString()
 
-                    val length = byteArrayContents.size
+                    val message = "$" + rdbBytes.size + "\r\n" + String(rdbBytes, Charsets.ISO_8859_1)
                     
-                    outputClient.write("$${length}\r\n${String(byteArrayContents)}".toByteArray())
+                    outputClient.write(message)
                     outputClient.flush()
                 }
             }
