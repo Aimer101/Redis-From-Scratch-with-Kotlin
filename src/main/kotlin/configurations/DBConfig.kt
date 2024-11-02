@@ -49,7 +49,7 @@ object DBConfig {
     }
 
     fun getRoleInfo(): String {
-        val role = if (master != null) "master" else "slave"
+        val role = if (master == null) "master" else "slave"
         return "role:$role"
     }
 
