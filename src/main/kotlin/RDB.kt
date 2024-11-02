@@ -16,6 +16,42 @@ class RDB {
         val EXPIRY_IN_S = 0xFD.toByte() // 4 bytes
     }
 
+    fun createPersistence(args : Array<String>) {
+        var dir: String? = null
+        var dbfilename: String? = null
+
+        for(i in args.indices){
+            when(args[i]){
+                "--dir" -> dir = args[i + 1]
+                "--dbfilename" -> dbfilename = args[i + 1]
+            }
+        }
+
+        ServerConfig.set("DIR", dir)
+        ServerConfig.set("DBFILENAME", dbfilename)
+
+        dir = ServerConfig.get("DIR")
+        dbfilename = ServerConfig.get("DBFILENAME")
+
+        // Create directory if it doesn't exist
+        val dirPath = Paths.get(dir)
+        if (!Files.exists(dirPath)) {
+            Files.createDirectories(dirPath)
+            println("Directory created: $dir")
+        } else {
+            println("Directory already exists: $dir")
+        }
+
+        // Create database file
+        val dbFilePath = Paths.get(dir, dbfilename)
+        if (!Files.exists(dbFilePath)) {
+            Files.createFile(dbFilePath)
+            println("Database file created: $dbfilename")
+        } else {
+            println("Database file already exists: $dbfilename")
+        }
+    }
+
     private fun handleMatchingKeyPattern(pattern: Regex, fis: FileInputStream, matchingKeys: MutableList<String>) : Boolean {
         val keyLength = fis.read()
         if (keyLength == -1) return false
@@ -126,55 +162,17 @@ class RDB {
                                 EXPIRY_IN_S -> {
                                     fis.skip(4) // Skip the 4-byte expiry timestamp
                                 }
-
+                            }
                         }
-                    }
 
-                }
+                    }
             }
 
-        } catch (e: IOException) {
+        }
+        }catch (e: IOException) {
             println("Error while reading RDB file: $e")
         }
 
         return null
     }
-
-
-    fun createPersistence(args : Array<String>) {
-        var dir: String? = null
-        var dbfilename: String? = null
-
-        for(i in args.indices){
-            when(args[i]){
-                "--dir" -> dir = args[i + 1]
-                "--dbfilename" -> dbfilename = args[i + 1]
-            }
-        }
-
-        ServerConfig.set("DIR", dir)
-        ServerConfig.set("DBFILENAME", dbfilename)
-
-        dir = ServerConfig.get("DIR")
-        dbfilename = ServerConfig.get("DBFILENAME")
-
-        // Create directory if it doesn't exist
-        val dirPath = Paths.get(dir)
-        if (!Files.exists(dirPath)) {
-            Files.createDirectories(dirPath)
-            println("Directory created: $dir")
-        } else {
-            println("Directory already exists: $dir")
-        }
-
-        // Create database file
-        val dbFilePath = Paths.get(dir, dbfilename)
-        if (!Files.exists(dbFilePath)) {
-            Files.createFile(dbFilePath)
-            println("Database file created: $dbfilename")
-        } else {
-            println("Database file already exists: $dbfilename")
-        }
-    }
-}
 }
