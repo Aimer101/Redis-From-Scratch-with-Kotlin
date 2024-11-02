@@ -7,7 +7,7 @@ import java.net.Socket
 fun main(args: Array<String>) {
     RDB().createPersistence(args)
 
-    var serverSocket = ServerSocket(6379)
+    var serverSocket = ServerSocket(DBConfig.port)
     serverSocket.reuseAddress = true
     println("Server started, waiting for connections...")
 
