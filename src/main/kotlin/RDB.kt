@@ -27,7 +27,7 @@ class RDB {
             }
         }
 
-        if(dir == null && dbfilename == null) {
+        if(dir != null && dbfilename != null) {
             DBConfig.set("DIR", dir)
             DBConfig.set("DBFILENAME", dbfilename)
 
