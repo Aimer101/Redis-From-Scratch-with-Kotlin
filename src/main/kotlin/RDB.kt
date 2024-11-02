@@ -2,6 +2,9 @@ import java.io.IOException
 import java.nio.file.Paths
 import java.nio.file.Files
 import java.io.FileInputStream
+import kotlin.text.Regex
+
+
 
 class RDB {
 
@@ -15,7 +18,7 @@ class RDB {
         val EXPIRY_IN_S = 0xFD.toByte() // 4 bytes
     }
 
-    private fun handleMatchingKeyPattern(pattern: String, fis: FileInputStream, matchingKeys: MutableList<String>) : Boolean {
+    private fun handleMatchingKeyPattern(pattern: Regex, fis: FileInputStream, matchingKeys: MutableList<String>) : Boolean {
         val keyLength = fis.read()
         if (keyLength == -1) return false
 
@@ -94,6 +97,9 @@ class RDB {
 
         ServerConfig.set("DIR", dir)
         ServerConfig.set("DBFILENAME", dbfilename)
+
+        dir = ServerConfig.get("DIR")
+        dbfilename = ServerConfig.get("DBFILENAME")
 
         // Create directory if it doesn't exist
         val dirPath = Paths.get(dir)
