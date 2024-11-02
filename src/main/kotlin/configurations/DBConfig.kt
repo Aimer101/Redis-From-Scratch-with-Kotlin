@@ -57,8 +57,17 @@ object DBConfig {
         return "master_replid:${this.masterReplId}"
     }
 
+
     fun getMasterReplOffsetInfo(): String {
         return "master_repl_offset:${this.masterReplOffset}"
+    }
+
+    fun getInfo(): String {
+        return """
+            ${getRoleInfo()}
+            ${getMasterReplIdInfo()}
+            ${getMasterReplOffsetInfo()}
+        """.trimIndent()
     }
 }
 
