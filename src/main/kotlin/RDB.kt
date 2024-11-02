@@ -4,8 +4,6 @@ import java.nio.file.Files
 import java.io.FileInputStream
 import kotlin.text.Regex
 
-
-
 class RDB {
 
     companion object {
@@ -53,7 +51,7 @@ class RDB {
                     }
 
                     if (isDatabaseSection) {
-                        // for now ignore metadata section which is 4 bytes according to the challenge description
+                        // for now ignore metadata section which is 4 bytes according to the challenge's description
                         fis.skip(4)
 
                         while (fis.read().also { byteRead = it } != -1) {
@@ -82,6 +80,64 @@ class RDB {
         }
 
         return matchingKeys
+    }
+
+    fun getValue(key : String) : String? {
+        val dbPath = ServerConfig.getDbFilePath()
+        var isDatabaseSection = false
+        var byteRead: Int
+
+        try {
+            FileInputStream(dbPath).use { fis ->
+                while(fis.read().also { byteRead = it } != -1) {
+                    if (byteRead.toByte() == DATABASE_SECTION) {
+                        isDatabaseSection = true
+                    }
+                    if(isDatabaseSection) {
+                        // for now ignore metadata section which is 4 bytes according to the challenge's description
+                        fis.skip(4)
+
+                        while (fis.read().also { byteRead = it } != -1) {
+                            when(byteRead.toByte()) {
+                                STRING_ENCODING -> {
+                                    val keyLength = fis.read()
+                                    if (keyLength == -1) break
+
+                                    val keyBytes = ByteArray(keyLength)
+                                    if(fis.read(keyBytes) != keyLength) break
+
+                                    val keyVal = String(keyBytes)
+
+                                    val valueLength = fis.read()
+                                    if (valueLength == -1) break
+
+                                    if(keyVal == key) {
+                                        val valBytes = ByteArray(valueLength)
+                                        if(fis.read(valBytes) != valueLength) break
+
+                                        return String(valBytes)
+                                    }
+
+                                    fis.skip(valueLength.toLong())
+                                }
+                                EXPIRY_IN_MS -> {
+                                    fis.skip(8) // Skip the 8-byte expiry timestamp
+                                }
+                                EXPIRY_IN_S -> {
+                                    fis.skip(4) // Skip the 4-byte expiry timestamp
+                                }
+
+                        }
+                    }
+
+                }
+            }
+
+        } catch (e: IOException) {
+            println("Error while reading RDB file: $e")
+        }
+
+        return null
     }
 
 
@@ -120,4 +176,5 @@ class RDB {
             println("Database file already exists: $dbfilename")
         }
     }
+}
 }

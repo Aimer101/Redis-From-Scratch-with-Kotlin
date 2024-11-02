@@ -73,6 +73,15 @@ class Connection {
                         outputClient.write("$${key.length}\r\n".toByteArray())
                         outputClient.write("${key}\r\n".toByteArray())
                     }
+                } else if (requestParts[0].uppercase() == Commands.GET.value) {
+                    val res : String? = RDB().getValue(requestParts[1])
+
+                    if(res == null) {
+                        outputClient.write("$-1\r\n".toByteArray())
+                    } else {
+                        outputClient.write("$${res.length}\r\n".toByteArray())
+                        outputClient.write("${res}\r\n".toByteArray())
+                    }
                 }
 
                 outputClient.flush()
