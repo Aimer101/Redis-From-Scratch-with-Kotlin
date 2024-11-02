@@ -9,7 +9,6 @@ object ServerConfig {
         return when(key.uppercase()){
             "DIR" -> dir
             "DBFILENAME" -> dbfilename
-            else -> null
         }
     }
 
@@ -29,7 +28,7 @@ object ServerConfig {
     }
 
     fun getDbFilePath(): String {
-        val dbFilePath = Paths.get(dir, dbFilename).toString()
+        val dbFilePath = Paths.get(dir, dbfilename).toString()
 
         return dbFilePath
     }

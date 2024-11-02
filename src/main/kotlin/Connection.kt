@@ -36,7 +36,7 @@ class Connection {
                         expiry = requestParts[4].toInt()
                     }
 
-                    Storage.set(requestParts[1], requestParts[2], expire)
+                    Storage.set(requestParts[1], requestParts[2], expiry)
                     outputClient.write("+OK\r\n".toByteArray())
                 } else if (requestParts[0].uppercase() == Commands.GET.value) {
                     val value = Storage.get(requestParts[1])

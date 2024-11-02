@@ -1,3 +1,6 @@
+import java.io.IOException
+import java.nio.file.Paths
+import java.nio.file.Files
 import java.io.FileInputStream
 
 class RDB {
@@ -21,7 +24,7 @@ class RDB {
 
         val key = String(keyBytes)
 
-        if (key.matches(regexPattern)) {
+        if (key.matches(pattern)) {
             matchingKeys.add(key)
         }
 
@@ -37,6 +40,7 @@ class RDB {
         val matchingKeys= mutableListOf<String>()
         val regexPattern = pattern.replace("*", ".*").toRegex()
         var isDatabaseSection = false
+        var byteRead: Int
 
         try {
             FileInputStream(dbPath).use { fis ->
@@ -52,7 +56,7 @@ class RDB {
                         while (fis.read().also { byteRead = it } != -1) {
                             when(byteRead.toByte()) {
                                 STRING_ENCODING -> {
-                                    val handleMatching = handleMatchingKeyPattern(pattern, fis, matchingKeys)
+                                    val handleMatching = handleMatchingKeyPattern(regexPattern, fis, matchingKeys)
 
                                     if (!handleMatching) {
                                         break
