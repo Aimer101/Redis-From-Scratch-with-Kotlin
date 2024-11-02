@@ -84,9 +84,10 @@ class RDB {
         return matchingKeys
     }
 
+
     fun createPersistence(args : Array<String>) {
-        var dir: String
-        var dbfilename: String
+        var dir: String? = null
+        var dbfilename: String? = null
 
         for(i in args.indices){
             when(args[i]){

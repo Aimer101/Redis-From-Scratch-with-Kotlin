@@ -9,6 +9,7 @@ object ServerConfig {
         return when(key.uppercase()){
             "DIR" -> dir
             "DBFILENAME" -> dbfilename
+            else -> ""
         }
     }
 
