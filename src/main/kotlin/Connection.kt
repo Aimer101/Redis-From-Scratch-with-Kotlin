@@ -40,6 +40,7 @@ class Connection {
                     outputClient.write("+OK\r\n".toByteArray())
                 } else if (requestParts[0].uppercase() == Commands.GET.value) {
                     println( "Command is get:"+ requestParts[1])
+                    println( "is db configured :"+ DBConfig.isConfigured)
                     var res : String? = null
 
                     if(DBConfig.isConfigured) {
