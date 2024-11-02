@@ -20,6 +20,8 @@ class RDB {
         var dir: String? = null
         var dbfilename: String? = null
         var networkPort = 6379
+        var masterHost: String? = null
+        var masterPort: Int? = null
 
         for(i in args.indices){
             when(args[i]){
@@ -27,8 +29,9 @@ class RDB {
                 "--dbfilename" -> dbfilename = args[i + 1]
                 "--port" -> networkPort = args[i+1].toInt()
                 "--replicaof" -> {
-                    val (masterHost, masterPort) = args[i+1].split(" ")
-                    DBConfig.setMaster(masterHost, masterPort.toInt())
+                    val (masterH, masterP) = args[i+1].split(" ")
+                    masterHost = masterH
+                    masterPort = masterP.toInt()
                 }
             }
         }
@@ -60,6 +63,10 @@ class RDB {
         }
 
         DBConfig.setPort(networkPort)
+
+        if(masterHost != null && masterPort != null) {
+            DBConfig.setMaster(masterHost, masterPort)
+        }
 
     }
 

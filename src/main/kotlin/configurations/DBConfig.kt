@@ -40,6 +40,8 @@ object DBConfig {
 
     fun setMaster(masterHost: String, masterPort: Int) {
         this.master = Master(masterHost, masterPort)
+        val replicaClient = ReplicaClient(masterHost, masterPort)
+        replicaClient.ping()
     }
 
     fun getDbFilePath(): String {
