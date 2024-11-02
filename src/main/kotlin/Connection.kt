@@ -74,7 +74,9 @@ class Connection {
                         outputClient.write("${key}\r\n".toByteArray())
                     }
                 } else if (requestParts[0].uppercase() == Commands.GET.value) {
+                    println( "Command is get:"+ requestParts[1] )
                     val res : String? = RDB().getValue(requestParts[1])
+                    println( "res is: $res")
 
                     if(res == null) {
                         outputClient.write("$-1\r\n".toByteArray())
