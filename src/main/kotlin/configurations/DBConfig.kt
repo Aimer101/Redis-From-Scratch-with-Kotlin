@@ -48,16 +48,16 @@ object DBConfig {
         return dbFilePath
     }
 
-    fun getRole(): String {
+    fun getRoleInfo(): String {
         val role = if (master != null) "master" else "slave"
         return "role:$role"
     }
 
-    fun getMasterReplId(): String {
+    fun getMasterReplIdInfo(): String {
         return "master_replid:${this.masterReplId}"
     }
 
-    fun getMasterReplOffset(): String {
+    fun getMasterReplOffsetInfo(): String {
         return "master_repl_offset:${this.masterReplOffset}"
     }
 }
