@@ -22,14 +22,14 @@ class Connection {
 
                 if(requestParts.isEmpty()) {
                     outputClient.write("-ERR\r\n".toByteArray())
-                } else if (requestParts[0].uppercase() == Commands.PING.value) {
+                } else if (requestParts[0].uppercase() == Command.PING.value) {
                     outputClient.write("+PONG\r\n".toByteArray())
-                } else if (requestParts[0].uppercase() == Commands.ECHO.value) {
+                } else if (requestParts[0].uppercase() == Command.ECHO.value) {
                     for (i in 1 until requestParts.size) {
                         println(requestParts[i])
                         outputClient.write("+${requestParts[i]}\r\n".toByteArray())
                     }
-                } else if (requestParts[0].uppercase() == Commands.SET.value) {
+                } else if (requestParts[0].uppercase() == Command.SET.value) {
                     var expiry: Int? = null
 
                     if(requestParts.size == 5 && requestParts[4].toIntOrNull() != null && requestParts[3].uppercase() == "PX") {
@@ -38,7 +38,7 @@ class Connection {
 
                     Storage.set(requestParts[1], requestParts[2], expiry)
                     outputClient.write("+OK\r\n".toByteArray())
-                } else if (requestParts[0].uppercase() == Commands.GET.value) {
+                } else if (requestParts[0].uppercase() == Command.GET.value) {
                     println( "Command is get:"+ requestParts[1])
                     println( "is db configured :"+ DBConfig.isConfigured)
                     var res : String? = null
@@ -55,9 +55,9 @@ class Connection {
                         outputClient.write("$${res.length}\r\n".toByteArray())
                         outputClient.write("${res}\r\n".toByteArray())
                     }
-                } else if (requestParts[0].uppercase() == Commands.CONFIG.value) {
-                    if (requestParts[1].uppercase() == Commands.GET.value) {
-                         // minutes the CONFIG and GET commands take up
+                } else if (requestParts[0].uppercase() == Command.CONFIG.value) {
+                    if (requestParts[1].uppercase() == ArgCommand.GET.value) {
+                         // minutes the CONFIG and GET Command take up
                          // times 2 because each value need to be return together with its key
                         val arrSize = (requestParts.size - 2) * 2
                         outputClient.write("*${arrSize}\r\n".toByteArray())
@@ -71,7 +71,7 @@ class Connection {
                         }
 
                     }
-                } else if (requestParts[0].uppercase() == Commands.KEYS.value) {
+                } else if (requestParts[0].uppercase() == Command.KEYS.value) {
                     val listOfKeys = RDB().getAllKeysMatchingPattern(requestParts[1])
                     println( "List of keys: $listOfKeys" )
                     // iterate and build the resp output for list of keys
@@ -80,6 +80,15 @@ class Connection {
                     for(key in listOfKeys) {
                         outputClient.write("$${key.length}\r\n".toByteArray())
                         outputClient.write("${key}\r\n".toByteArray())
+                    }
+                } else if (requestParts[0].uppercase() == Command.INFO.value) {
+                    if(requestParts[1].uppercase() == ArgCommand.REPLICATION.value) {
+                        val response = "role:master"
+
+                        outputClient.write("$${response.length}\r\n".toByteArray())
+                        outputClient.write("${response}\r\n".toByteArray())
+                    } else {
+                        outputClient.write("$-1\r\n".toByteArray())
                     }
                 }
 
