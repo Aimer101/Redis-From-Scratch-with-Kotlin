@@ -6,8 +6,9 @@ object DBConfig {
     var dbfilename: String = "dump.rdb"
     var isConfigured = false
     var networkPort = 6379
-    var masterHost : String? = null
-    var masterPort : Int? = null
+    var master : Master? = null
+    val masterReplicationId: String = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
+    val masterReplicationOffset: Int = 0
 
     fun get(key: String): String {
         return when(key.uppercase()){
@@ -38,8 +39,7 @@ object DBConfig {
     }
 
     fun setMaster(masterHost: String, masterPort: Int) {
-        this.masterHost = masterHost
-        this.masterPort = masterPort
+        this.master = Master(masterHost, masterPort)
     }
 
     fun getDbFilePath(): String {
@@ -48,8 +48,23 @@ object DBConfig {
         return dbFilePath
     }
 
-    fun getInfo(): String {
-        val role = if (masterHost == null && masterPort == null) "master" else "slave"
+    fun getRole(): String {
+        val role = if (master != null) "master" else "slave"
         return "role:$role"
     }
+
+    fun getMasterReplicationId(): String {
+        return "master_replid:${this.masterReplicationId}"
+    }
+
+    fun getMasterReplicationOffset(): String {
+        return "master_repl_offset:${this.masterReplicationOffset}"
+    }
 }
+
+data class Master(
+    val host: String, 
+    val port: Int, 
+    val masterReplicationId: String = "", 
+    val masterReplicationOffset: Int = 0
+)

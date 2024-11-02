@@ -83,10 +83,17 @@ class Connection {
                     }
                 } else if (requestParts[0].uppercase() == Command.INFO.value) {
                     if(requestParts[1].uppercase() == ArgCommand.REPLICATION.value) {
-                        val response = DBConfig.getInfo()
+                        val dbRole = DBConfig.getRole()
+                        outputClient.write("$${dbRole.length}\r\n".toByteArray())
+                        outputClient.write("${dbRole}\r\n".toByteArray())
 
-                        outputClient.write("$${response.length}\r\n".toByteArray())
-                        outputClient.write("${response}\r\n".toByteArray())
+                        val dbReplId = DBConfig.getMasterReplicationId()
+                        outputClient.write("$${dbReplId.length}\r\n".toByteArray())
+                        outputClient.write("${dbReplId}\r\n".toByteArray())
+
+                        val dbReplOffset = DBConfig.getMasterReplicationOffset()
+                        outputClient.write("$${dbReplOffset.length}\r\n".toByteArray())
+                        outputClient.write("${dbReplOffset}\r\n".toByteArray())
                     } else {
                         outputClient.write("$-1\r\n".toByteArray())
                     }
