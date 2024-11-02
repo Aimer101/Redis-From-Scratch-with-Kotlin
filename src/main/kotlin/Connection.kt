@@ -109,6 +109,8 @@ class Connection {
                     } else {
                         outputClient.write("$-1\r\n".toByteArray())
                     }
+                } else if (requestParts[0].uppercase() == Command.REPLCONF.value) {
+                    outputClient.write("+OK\r\n".toByteArray())
                 }
 
                 outputClient.flush()

@@ -6,6 +6,7 @@ enum class Command(val value: String) {
     CONFIG("CONFIG"),
     KEYS("KEYS"),
     INFO("INFO"),
+    REPLCONF("REPLCONF"),
 
 }
 
