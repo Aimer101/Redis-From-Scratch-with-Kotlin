@@ -7,7 +7,6 @@ class ReplicaClient (host : String, port : Int) {
 
     fun ping () {
         println("Sending ping to master")
-        val outputClient = socket.getOutputStream()
         outputClient.println("*1\r\n$4\r\nPING\r\n".toByteArray())
         println("Ping sent to master")
     }
