@@ -3,11 +3,6 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.Socket
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.io.IOException
-import java.io.FileInputStream
-import java.io.FileOutputStream
 
 fun main(args: Array<String>) {
     RDB().createPersistence(args)

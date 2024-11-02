@@ -70,8 +70,6 @@ class RDB {
                     }
                 }
             }
-
-
         } catch (e: IOException) {
             println("Error while reading RDB file: $e")
         }

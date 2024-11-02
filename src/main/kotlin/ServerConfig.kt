@@ -13,10 +13,18 @@ object ServerConfig {
         }
     }
 
-    fun set(key: String, value: String) {
+    fun set(key: String, value: String?) {
         when(key.uppercase()){
-            "DIR" -> dir = value
-            "DBFILENAME" -> dbfilename = value
+            "DIR" -> {
+                if (value != null) {
+                    dir = value
+                }
+            }
+            "DBFILENAME" -> {
+                if (value != null) {
+                    dbfilename = value
+                }
+            }
         }
     }
 

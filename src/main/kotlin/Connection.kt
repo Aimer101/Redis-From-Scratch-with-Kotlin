@@ -74,6 +74,8 @@ class Connection {
                         outputClient.write("${key}\r\n".toByteArray())
                     }
                 }
+
+                outputClient.flush()
             }
         } catch (e: Exception) {
             println("Error handling client: ${e.message}")
@@ -82,5 +84,6 @@ class Connection {
             outputClient.close()
             socket.close()
         }
+        
     }
 }
