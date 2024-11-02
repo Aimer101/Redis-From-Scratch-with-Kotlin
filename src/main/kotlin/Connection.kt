@@ -47,7 +47,7 @@ class Connection {
                     //     outputClient.write("+$value\r\n".toByteArray())
 
                     // }
-                    println( "Command is get:"+ requestParts[1] )
+                    println( "Command is get:"+ requestParts[1])
                     val res : String? = RDB().getValue(requestParts[1])
                     println( "res is: $res")
 
