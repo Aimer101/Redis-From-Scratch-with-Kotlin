@@ -24,7 +24,7 @@ class ReplicaClient (private val host : String, private val port : Int) {
         outputClient.flush()
         println("Replconf 1 sent to master")
 
-        val response = request.readLine()
+        var response = request.readLine()
         println("Response from master for replconf 1: $response")
 
         println("Sending replconf 2 to master")
@@ -32,7 +32,6 @@ class ReplicaClient (private val host : String, private val port : Int) {
         outputClient.flush()
         println("Replconf 2 sent to master")
 
-        request = BufferedReader(InputStreamReader(socket.getInputStream()))
         response = request.readLine()
         println("Response from master for replconf 2: $response")
     }
