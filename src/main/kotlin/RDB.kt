@@ -27,29 +27,32 @@ class RDB {
             }
         }
 
-        ServerConfig.set("DIR", dir)
-        ServerConfig.set("DBFILENAME", dbfilename)
+        if(dir == null && dbfilename == null) {
+            DBConfig.set("DIR", dir)
+            DBConfig.set("DBFILENAME", dbfilename)
 
-        dir = ServerConfig.get("DIR")
-        dbfilename = ServerConfig.get("DBFILENAME")
+            dir = DBConfig.get("DIR")
+            dbfilename = DBConfig.get("DBFILENAME")
 
-        // Create directory if it doesn't exist
-        val dirPath = Paths.get(dir)
-        if (!Files.exists(dirPath)) {
-            Files.createDirectories(dirPath)
-            println("Directory created: $dir")
-        } else {
-            println("Directory already exists: $dir")
+            // Create directory if it doesn't exist
+            val dirPath = Paths.get(dir)
+            if (!Files.exists(dirPath)) {
+                Files.createDirectories(dirPath)
+                println("Directory created: $dir")
+            } else {
+                println("Directory already exists: $dir")
+            }
+
+            // Create database file
+            val dbFilePath = Paths.get(dir, dbfilename)
+            if (!Files.exists(dbFilePath)) {
+                Files.createFile(dbFilePath)
+                println("Database file created: $dbfilename")
+            } else {
+                println("Database file already exists: $dbfilename")
+            }
         }
 
-        // Create database file
-        val dbFilePath = Paths.get(dir, dbfilename)
-        if (!Files.exists(dbFilePath)) {
-            Files.createFile(dbFilePath)
-            println("Database file created: $dbfilename")
-        } else {
-            println("Database file already exists: $dbfilename")
-        }
     }
 
     private fun handleMatchingKeyPattern(pattern: Regex, fis: FileInputStream, matchingKeys: MutableList<String>) : Boolean {
@@ -73,7 +76,7 @@ class RDB {
     }
 
     fun getAllKeysMatchingPattern(pattern: String): List<String> {
-        val dbPath = ServerConfig.getDbFilePath()
+        val dbPath = DBConfig.getDbFilePath()
         val matchingKeys= mutableListOf<String>()
         val regexPattern = pattern.replace("*", ".*").toRegex()
         var isDatabaseSection = false
@@ -119,7 +122,7 @@ class RDB {
     }
 
     fun getValue(key : String) : String? {
-        val dbPath = ServerConfig.getDbFilePath()
+        val dbPath = DBConfig.getDbFilePath()
         var isDatabaseSection = false
         var byteRead: Int
 

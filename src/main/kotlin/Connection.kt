@@ -39,17 +39,14 @@ class Connection {
                     Storage.set(requestParts[1], requestParts[2], expiry)
                     outputClient.write("+OK\r\n".toByteArray())
                 } else if (requestParts[0].uppercase() == Commands.GET.value) {
-                    // val value = Storage.get(requestParts[1])
-
-                    // if(value == null) {
-                    //     outputClient.write("$-1\r\n".toByteArray())
-                    // } else {
-                    //     outputClient.write("+$value\r\n".toByteArray())
-
-                    // }
                     println( "Command is get:"+ requestParts[1])
-                    val res : String? = RDB().getValue(requestParts[1])
-                    println( "res is: $res")
+                    val res : String? = null
+
+                    if(DBConfig.isConfigured) {
+                        res = RDB().getValue(requestParts[1])
+                    } else {
+                        res = Storage.get(requestParts[1])
+                    }
 
                     if(res == null) {
                         outputClient.write("$-1\r\n".toByteArray())
@@ -67,7 +64,7 @@ class Connection {
                         for (i in 2 until requestParts.size) {
                             outputClient.write("$${requestParts[i].length}\r\n".toByteArray())
                             outputClient.write("${requestParts[i].lowercase()}\r\n".toByteArray())
-                            val value : String = ServerConfig.get(requestParts[i]) ?: ""
+                            val value : String = DBConfig.get(requestParts[i]) ?: ""
                             outputClient.write("$${value.length}\r\n".toByteArray())
                             outputClient.write("${value}\r\n".toByteArray())
                         }
