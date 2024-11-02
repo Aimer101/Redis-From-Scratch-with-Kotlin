@@ -28,7 +28,7 @@ class RDB {
                 "--port" -> networkPort = args[i+1].toInt()
                 "--replicaof" -> {
                     val (masterHost, masterPort) = args[i+1].split(" ")
-                    DBConfig.setMaster(masterHost, masterPort)
+                    DBConfig.setMaster(masterHost, masterPort.toInt())
                 }
             }
         }
