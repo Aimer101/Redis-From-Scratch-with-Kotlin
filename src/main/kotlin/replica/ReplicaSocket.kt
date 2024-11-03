@@ -35,7 +35,6 @@ object ReplicaSocket {
             socket.getOutputStream().write(command.toByteArray())
             socket.getOutputStream().flush()
         }
-        // Thread.sleep(1000)
 
     }
 }

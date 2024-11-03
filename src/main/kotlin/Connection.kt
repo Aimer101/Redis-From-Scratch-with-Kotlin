@@ -111,7 +111,7 @@ class Connection {
                         sendEmptyRDB = true
                         ReplicaSocket.addSocket(socket)
                     } else if (requestParts[0].uppercase() == Command.WAIT.value) {
-                        outputClient.write(":0\r\n".toByteArray())
+                        outputClient.write(":${ReplicaSocket.replicaSockets.size}\r\n".toByteArray())
                     }
 
                     outputClient.flush()
