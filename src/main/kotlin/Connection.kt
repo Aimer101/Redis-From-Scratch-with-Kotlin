@@ -110,6 +110,8 @@ class Connection {
                         outputClient.write("+FULLRESYNC ${DBConfig.masterReplId} 0\r\n".toByteArray())
                         sendEmptyRDB = true
                         ReplicaSocket.addSocket(socket)
+                    } else if (requestParts[0].uppercase() == Command.WAIT.value) {
+                        outputClient.write(":0\r\n".toByteArray())
                     }
 
                     outputClient.flush()
