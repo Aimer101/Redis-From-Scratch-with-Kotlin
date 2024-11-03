@@ -17,7 +17,7 @@ class Connection {
                 }
 
                 val request = buffer.copyOfRange(0, bytesRead).toString(Charsets.UTF_8);
-                logWithTimestamp("Raw command received: $request")
+                // logWithTimestamp("Raw command received: $request")
                 val commandParts = RedisRequestProcessor().procesConcurrentRequest(request)
                 var sendEmptyRDB = false
 
