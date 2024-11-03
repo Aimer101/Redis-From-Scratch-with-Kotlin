@@ -9,11 +9,13 @@ object ReplicaClient {
     private lateinit var socket: Socket
     private lateinit var outputClient: PrintWriter
     private lateinit var request: BufferedReader
+    private var isReady = false
 
     fun connectToMaster(host: String, port: Int) {
         socket          = Socket(host, port)
         outputClient    = PrintWriter(socket.getOutputStream(), true)
         request         = BufferedReader(InputStreamReader(socket.getInputStream()))
+
 
         Thread {
             ping()
@@ -21,6 +23,8 @@ object ReplicaClient {
             psync()
             startListening()
         }.start()
+
+
     }
 
     private fun startListening() {
@@ -31,6 +35,10 @@ object ReplicaClient {
         logPropagationWithTimestamp("Starting replica - master...")
 
         while(true) {
+            if(!isReady) {
+                continue
+                logPropagationWithTimestamp("Waiting for psync...")
+            }
             bytesRead = input.read(buffer)
 
             if (bytesRead == -1) {
@@ -40,6 +48,12 @@ object ReplicaClient {
             val request = buffer.copyOfRange(0, bytesRead).toString(Charsets.UTF_8);
             logPropagationWithTimestamp("Raw command received during propagation: $request")
             val requestParts = RedisRequestProcessor().procesConcurrentRequest(request)
+            logPropagationWithTimestamp("Request parts during propagation: $requestParts")
+            logPropagationWithTimestamp("Request parts size: ${requestParts.size}")
+
+            if(requestParts.isEmpty()) {
+                continue
+            }
 
             // iterate over concurrent request parts
             for(commandParts in requestParts) {
@@ -69,11 +83,15 @@ object ReplicaClient {
                                 outputClient.print("${res}\r\n")
                             }
                             outputClient.flush()
+                    } else if (commandParts[0].uppercase() == Command.REPLCONF.value) {
+                        if (commandParts[1].uppercase() == ArgCommand.GETACK.value) {
+                            outputClient.print("*3\r\n$8\r\nREPLCONF\r\n$3\r\nACK\r\n$1\r\n0\r\n")
+                            outputClient.flush()
+                        }
+
                     }
                 }
             }
-
-
         }
     }
 
@@ -111,6 +129,7 @@ object ReplicaClient {
         outputClient.print("*3\r\n$5\r\nPSYNC\r\n$1\r\n?\r\n$2\r\n-1\r\n")
         outputClient.flush()
         logPropagationWithTimestamp("Psync sent to master")
+        isReady = true
 
         // val response = request.readLine()
         // logPropagationWithTimestamp("Response from master for psync: $response")

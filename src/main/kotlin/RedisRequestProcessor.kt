@@ -25,16 +25,25 @@ class RedisRequestProcessor {
         return parsedRequestParts;
     }
 
+    fun extractRESPCommand(input: String): String? {
+        // Regular expression to match RESP array indicator *<number>
+        val regex = Regex("\\*[0-9]+")
+        return regex.find(input)?.value
+    }
+
     fun procesConcurrentRequest(request: String): ArrayList<List<String>> {
         // Process the request and create a RedisRequest object
         // This is a placeholder implementation
         // *2\r\n$4\r\nECHO\r\n$9\r\nraspberry\r\n*3\r\n$3\r\nSET\r\n$3\r\nbaz\r\n$3\r\n789\r\n
         val parsedRequestParts = ArrayList<List<String>>()
-        var rawInput = ArrayList(request.split("\r\n"))
+        val rawInput = ArrayList(request.split("\r\n"))
 
-        while(rawInput.isNotEmpty() && rawInput[0].contains("*")) {
-            val commandLength = rawInput[0].replace("*", "").toInt()
-            rawInput.removeAt(0)
+        while(rawInput.isNotEmpty()) {
+            val command = rawInput.removeAt(0)
+            if(extractRESPCommand(command) == null) {
+                continue
+            }
+            val commandLength = extractRESPCommand(command)!!.replace("*", "").toInt()
 
             val tempArr: ArrayList<String> = ArrayList()
 
