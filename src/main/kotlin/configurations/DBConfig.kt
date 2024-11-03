@@ -34,16 +34,20 @@ object DBConfig {
         }
     }
 
+    fun isMaster(): Boolean {
+        if(master == null) {
+            return true
+        }
+        return false
+    }
+
     fun setPort(networkPort: Int) {
         this.networkPort = networkPort
     }
 
     fun setMaster(masterHost: String, masterPort: Int) {
         this.master = Master(masterHost, masterPort)
-        val replicaClient = ReplicaClient(masterHost, masterPort)
-        replicaClient.ping()
-        replicaClient.replconf()
-        replicaClient.psync()
+        ReplicaClient.connectToMaster(masterHost, masterPort)
     }
 
     fun getDbFilePath(): String {

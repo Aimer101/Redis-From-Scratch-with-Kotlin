@@ -32,10 +32,10 @@ object ReplicaSocket {
 
 
         for(socket in replicaSockets) {
-
             socket.getOutputStream().write(command.toByteArray())
             socket.getOutputStream().flush()
         }
+        // Thread.sleep(1000)
 
     }
 }

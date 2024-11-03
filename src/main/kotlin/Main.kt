@@ -9,13 +9,17 @@ fun main(args: Array<String>) {
 
     var serverSocket = ServerSocket(DBConfig.networkPort)
     serverSocket.reuseAddress = true
-    println("Server started, waiting for connections...")
+
+
+    println("${DBConfig.getRoleInfo()} Server started, waiting for connections...")
+    // Thread.sleep(2000)
+
 
     val connection = Connection()
 
     while (true) {
         val client = serverSocket.accept()
-        println("Client connected: ${client.inetAddress}")
+        println("${DBConfig.getRoleInfo()} Client connected: ${client.inetAddress}")
 
         Thread {
             connection.onConnect(client)

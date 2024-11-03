@@ -3,6 +3,7 @@ import java.util.TimerTask
 import java.util.concurrent.ConcurrentHashMap
 
 
+
 object Storage {
     private val storage = ConcurrentHashMap<String, String>()
 
@@ -16,6 +17,9 @@ object Storage {
                 }
              }, expire.toLong())
         }
+
+        println("${DBConfig.getRoleInfo()} Stored key: $key value: $value with expiry of $expire")
+
     }
 
     fun get(key: String): String? = storage[key]
