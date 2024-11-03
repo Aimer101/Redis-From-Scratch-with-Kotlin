@@ -10,6 +10,7 @@ object ReplicaClient {
     private lateinit var outputClient: PrintWriter
     private lateinit var request: BufferedReader
     private var isReady = false
+    private var processedRequestBytes = 0
 
     fun connectToMaster(host: String, port: Int) {
         socket          = Socket(host, port)
@@ -24,6 +25,29 @@ object ReplicaClient {
             startListening()
         }.start()
 
+
+    }
+
+    private fun recordProcessedRequestBytes(request: List<String>) {
+        logPropagationWithTimestamp("recording the processed request bytes" + request)
+
+        val totalArgs = request.size.toString().length
+        logPropagationWithTimestamp("total args bytes are " + totalArgs)
+
+        processedRequestBytes += totalArgs + 1 + 2 // 1 for *, 2 for \r\n
+
+        for(arg in request) {
+            logPropagationWithTimestamp("processing arg " + arg)
+
+            val lengthOfArg = arg.length.toString().length
+            logPropagationWithTimestamp("length of arg length is " + lengthOfArg)
+
+            processedRequestBytes += lengthOfArg + 1 + 2 // 1 for $, 2 for \r\n
+
+            processedRequestBytes += arg.length + 2 // 2 for \r\n
+            logPropagationWithTimestamp("actual length of arg  is " + arg.length)
+
+        }
 
     }
 
@@ -85,11 +109,15 @@ object ReplicaClient {
                             outputClient.flush()
                     } else if (commandParts[0].uppercase() == Command.REPLCONF.value) {
                         if (commandParts[1].uppercase() == ArgCommand.GETACK.value) {
-                            outputClient.print("*3\r\n$8\r\nREPLCONF\r\n$3\r\nACK\r\n$1\r\n0\r\n")
+
+                            outputClient.print("*3\r\n$8\r\nREPLCONF\r\n$3\r\nACK\r\n$${processedRequestBytes.toString().length}\r\n${processedRequestBytes.toString()}\r\n")
                             outputClient.flush()
                         }
 
                     }
+
+                    recordProcessedRequestBytes(commandParts)
+
                 }
             }
         }

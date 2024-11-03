@@ -80,8 +80,8 @@ object DBConfig {
 }
 
 data class Master(
-    val host: String, 
-    val port: Int, 
-    val masterReplId: String = "", 
+    val host: String,
+    val port: Int,
+    val masterReplId: String = "",
     val masterReplOffset: Int = 0
 )
