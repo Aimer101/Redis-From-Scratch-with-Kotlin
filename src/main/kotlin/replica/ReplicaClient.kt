@@ -15,15 +15,11 @@ object ReplicaClient {
         outputClient    = PrintWriter(socket.getOutputStream(), true)
         request         = BufferedReader(InputStreamReader(socket.getInputStream()))
 
+        Thread {
             ping()
             replconf()
-        Thread {
             psync()
-        }.start()
-
-        Thread {
             startListening()
-
         }.start()
     }
 
@@ -42,7 +38,7 @@ object ReplicaClient {
             }
 
             val request = buffer.copyOfRange(0, bytesRead).toString(Charsets.UTF_8);
-            // logPropagationWithTimestamp("Raw command received during propagation: $request")
+            logPropagationWithTimestamp("Raw command received during propagation: $request")
             val requestParts = RedisRequestProcessor().procesConcurrentRequest(request)
 
             // iterate over concurrent request parts
