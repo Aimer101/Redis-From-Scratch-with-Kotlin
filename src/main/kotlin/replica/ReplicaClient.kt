@@ -15,11 +15,15 @@ object ReplicaClient {
         outputClient    = PrintWriter(socket.getOutputStream(), true)
         request         = BufferedReader(InputStreamReader(socket.getInputStream()))
 
-        Thread {
             ping()
             replconf()
+        Thread {
             psync()
+        }.start()
+
+        Thread {
             startListening()
+
         }.start()
     }
 
