@@ -95,7 +95,7 @@ class Connection {
                         }
                     } else if (requestParts[0].uppercase() == Command.INFO.value) {
                         if(requestParts[1].uppercase() == ArgCommand.REPLICATION.value) {
-                            val response = DBConfig.getInfo()
+                            val response = DBConfig.getInfo() 
 
                             outputClient.write("$${response.length}\r\n".toByteArray())
                             outputClient.write("$response\r\n".toByteArray())
