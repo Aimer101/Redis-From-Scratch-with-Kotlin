@@ -7,6 +7,7 @@ class Connection {
         val outputClient = socket.getOutputStream()
         var bytesRead: Int
         val buffer = ByteArray(1024);
+        var lastWriteMessageOffset = 0L // record offset of the latest write opeartion
 
         try {
             while(socket.isConnected) {
@@ -19,7 +20,6 @@ class Connection {
                 val request = buffer.copyOfRange(0, bytesRead).toString(Charsets.UTF_8);
                 logWithTimestamp("Raw command received: $request")
                 val commandParts = RedisRequestProcessor().procesConcurrentRequest(request)
-                var sendEmptyRDB = false
 
                 for(requestParts in commandParts) {
                     if(requestParts.isEmpty()) {
@@ -41,7 +41,7 @@ class Connection {
                         Storage.set(requestParts[1], requestParts[2], expiry)
 
                         // send to replicas
-                        ReplicaSocket.set(requestParts[1], requestParts[2], expiry)
+                        lastWriteMessageOffset = ReplicaService.set(requestParts[1], requestParts[2], expiry)
 
 
                         logWithTimestamp("set ${requestParts[1]} ${requestParts[2]}")
@@ -93,7 +93,7 @@ class Connection {
                         }
                     } else if (requestParts[0].uppercase() == Command.INFO.value) {
                         if(requestParts[1].uppercase() == ArgCommand.REPLICATION.value) {
-                            val response = DBConfig.getInfo() 
+                            val response = DBConfig.getInfo()
 
                             outputClient.write("$${response.length}\r\n".toByteArray())
                             outputClient.write("$response\r\n".toByteArray())
@@ -104,26 +104,37 @@ class Connection {
                         } else {
                             outputClient.write("$-1\r\n".toByteArray())
                         }
-                    } else if (requestParts[0].uppercase() == Command.REPLCONF.value) {
-                        outputClient.write("+OK\r\n".toByteArray())
-                    } else if (requestParts[0].uppercase() == Command.PSYNC.value) {
-                        outputClient.write("+FULLRESYNC ${DBConfig.masterReplId} 0\r\n".toByteArray())
-                        sendEmptyRDB = true
-                        ReplicaSocket.addSocket(socket)
+                    }
+                    else if (requestParts[0].uppercase() == Command.REPLCONF.value) {
+                        if(requestParts[1].uppercase() == ArgCommand.ACK.value) {
+                            ReplicaService.handleAckReceived(socket ,requestParts[2].toLong())
+                        }else {
+                            outputClient.write("+OK\r\n".toByteArray())
+                        }
+                    }
+                    else if (requestParts[0].uppercase() == Command.PSYNC.value) {
+                        ReplicaService.addSocket(socket)
+                        break
                     } else if (requestParts[0].uppercase() == Command.WAIT.value) {
-                        outputClient.write(":${ReplicaSocket.replicaSockets.size}\r\n".toByteArray())
+                        val startTime = System.currentTimeMillis()
+                        val nReplicas = requestParts[1].toInt()
+                        val timeout = requestParts[2].toLong()
+                        var numReplicaAcked = 0
+
+                        while(System.currentTimeMillis() - startTime <= timeout) {
+                            ReplicaService.sendAck()
+                            numReplicaAcked = ReplicaService.nReplicaAcked(lastWriteMessageOffset)
+
+                            if(numReplicaAcked >= nReplicas) {
+                                break
+                            }
+                        }
+
+                        val socketSize = numReplicaAcked
+                        outputClient.write(":${socketSize}\r\n".toByteArray())
                     }
 
                     outputClient.flush()
-
-                    if(sendEmptyRDB) {
-                        val rdbBytes = RDB.EMPTY_RDB.decodeHexString()
-
-                        val message = "$" + rdbBytes.size + "\r\n" + String(rdbBytes, Charsets.ISO_8859_1)
-
-                        outputClient.write(message.toByteArray(Charsets.ISO_8859_1))
-                        outputClient.flush()
-                    }
                 }
             }
         } catch (e: Exception) {

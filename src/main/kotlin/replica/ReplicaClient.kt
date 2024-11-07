@@ -3,19 +3,25 @@ import java.io.PrintWriter
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.ServerSocket
-import java.lang.Thread.sleep
+// import java.util.concurrent.ArrayBlockingQueue
+// import java.util.concurrent.TimeUnit
 
 object ReplicaClient {
     private lateinit var socket: Socket
     private lateinit var outputClient: PrintWriter
     private lateinit var request: BufferedReader
     private var isReady = false
-    private var processedRequestBytes = 0
+    @Volatile private var offset = 0
+
 
     fun connectToMaster(host: String, port: Int) {
         socket          = Socket(host, port)
         outputClient    = PrintWriter(socket.getOutputStream(), true)
         request         = BufferedReader(InputStreamReader(socket.getInputStream()))
+
+        // Thread{
+        //     processQueue()
+        // }.start()
 
 
         Thread {
@@ -34,19 +40,22 @@ object ReplicaClient {
         val totalArgs = request.size.toString().length
         logPropagationWithTimestamp("total args bytes are " + totalArgs)
 
-        processedRequestBytes += totalArgs + 1 + 2 // 1 for *, 2 for \r\n
+        synchronized(offset) {
 
-        for(arg in request) {
-            logPropagationWithTimestamp("processing arg " + arg)
+            offset += totalArgs + 1 + 2 // 1 for *, 2 for \r\n
 
-            val lengthOfArg = arg.length.toString().length
-            logPropagationWithTimestamp("length of arg length is " + lengthOfArg)
+            for(arg in request) {
+                logPropagationWithTimestamp("processing arg " + arg)
 
-            processedRequestBytes += lengthOfArg + 1 + 2 // 1 for $, 2 for \r\n
+                val lengthOfArg = arg.length.toString().length
+                logPropagationWithTimestamp("length of arg length is " + lengthOfArg)
 
-            processedRequestBytes += arg.length + 2 // 2 for \r\n
-            logPropagationWithTimestamp("actual length of arg  is " + arg.length)
+                offset += lengthOfArg + 1 + 2 // 1 for $, 2 for \r\n
 
+                offset += arg.length + 2 // 2 for \r\n
+                logPropagationWithTimestamp("actual length of arg  is " + arg.length)
+
+            }
         }
 
     }
@@ -60,8 +69,8 @@ object ReplicaClient {
 
         while(true) {
             if(!isReady) {
-                continue
                 logPropagationWithTimestamp("Waiting for psync...")
+                continue
             }
             bytesRead = input.read(buffer)
 
@@ -81,46 +90,27 @@ object ReplicaClient {
 
             // iterate over concurrent request parts
             for(commandParts in requestParts) {
-                if(!requestParts.isEmpty()) {
-                    if (commandParts[0].uppercase() == Command.SET.value) {
-                        logPropagationWithTimestamp("processing set command ${commandParts[1]} ${commandParts[2]}")
-                        var expiry: Int? = null
+                    if(commandParts[0].uppercase() == Command.SET.value) {
+                            var expiry: Int? = null
 
-                        if(commandParts.size == 5 && commandParts[4].toIntOrNull() != null && commandParts[3].uppercase() == "PX") {
-                            expiry = commandParts[4].toInt()
-                        }
-
-                        Storage.set(commandParts[1], commandParts[2], expiry)
-
-                        logPropagationWithTimestamp("set ${commandParts[1]} ${commandParts[2]}")
-                    } else if (commandParts[0].uppercase() == Command.GET.value) {
-                            logPropagationWithTimestamp("get ${commandParts[1]}")
-
-                            var res : String? = null
-
-                            res = Storage.get(commandParts[1])
-
-                            if(res == null) {
-                                outputClient.print("$-1\r\n")
-                            } else {
-                                outputClient.print("$${res.length}\r\n")
-                                outputClient.print("${res}\r\n")
+                            if(commandParts.size == 5 && commandParts[4].toIntOrNull() != null && commandParts[3].uppercase() == "PX") {
+                                expiry = commandParts[4].toInt()
                             }
-                            outputClient.flush()
+
+                            Storage.set(commandParts[1], commandParts[2], expiry)
+
+                            logPropagationWithTimestamp("set ${commandParts[1]} ${commandParts[2]}")
                     } else if (commandParts[0].uppercase() == Command.REPLCONF.value) {
                         if (commandParts[1].uppercase() == ArgCommand.GETACK.value) {
 
-                            outputClient.print("*3\r\n$8\r\nREPLCONF\r\n$3\r\nACK\r\n$${processedRequestBytes.toString().length}\r\n${processedRequestBytes.toString()}\r\n")
+                            outputClient.print("*3\r\n$8\r\nREPLCONF\r\n$3\r\nACK\r\n$${offset.toString().length}\r\n${offset.toString()}\r\n")
                             outputClient.flush()
                         }
 
                     }
-
                     recordProcessedRequestBytes(commandParts)
-
                 }
             }
-        }
     }
 
 
