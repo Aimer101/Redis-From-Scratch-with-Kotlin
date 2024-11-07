@@ -40,7 +40,7 @@ class Connection {
 
                         Storage.set(requestParts[1], requestParts[2], expiry)
 
-                        // send to replicas
+                        // send to replicas and record the offset
                         lastWriteMessageOffset = ReplicaService.set(requestParts[1], requestParts[2], expiry)
 
 
