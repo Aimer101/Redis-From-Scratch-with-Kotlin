@@ -30,7 +30,7 @@ object Storage {
 
     }
 
-    fun get(key: String): String? {
+    @Synchronized fun get(key: String): String? {
         val item = storage[key]
 
         if(item is RedisValue.StringValue) {
@@ -69,7 +69,7 @@ object Storage {
         return null
     }
 
-    fun handleXadd(key: String, id: String, fields : HashMap<String, String>) : String{
+    @Synchronized fun handleXadd(key: String, id: String, fields : HashMap<String, String>) : String{
         val item = storage[key]
 
         if (item is RedisValue.StringValue) {
