@@ -30,7 +30,7 @@ object Storage {
 
     }
 
-    @Synchronized fun get(key: String): String? {
+    fun get(key: String): String? {
         val item = storage[key]
 
         if(item is RedisValue.StringValue) {
@@ -69,20 +69,23 @@ object Storage {
         return null
     }
 
-    @Synchronized fun handleXadd(key: String, id: String, fields : HashMap<String, String>) : String{
-        val item = storage[key]
+    fun handleXadd(key: String, id: String, fields : HashMap<String, String>) : String{
 
-        if (item is RedisValue.StringValue) {
-            throw Exception("WRONGTYPE Operation against a key holding the wrong kind of value")
+        syncronized(storage) {
+            val item = storage[key]
+
+            if (item is RedisValue.StringValue) {
+                throw Exception("WRONGTYPE Operation against a key holding the wrong kind of value")
+            }
+
+            if (item is RedisValue.StreamValue) {
+                item.entries.add(StreamEntry(id, fields))
+            } else {
+                storage[key] = RedisValue.StreamValue(mutableListOf(StreamEntry(id, fields)))
+            }
+
+            return id
         }
-
-        if (item is RedisValue.StreamValue) {
-            item.entries.add(StreamEntry(id, fields))
-        } else {
-            storage[key] = RedisValue.StreamValue(mutableListOf(StreamEntry(id, fields)))
-        }
-
-        return id
     }
 
     fun getType(key: String): String {
