@@ -10,7 +10,7 @@ enum class Command(val value: String) {
     PSYNC("PSYNC"),
     WAIT("WAIT"),
     TYPE("TYPE"),
-
+    XADD("XADD"),
 }
 
 enum class ArgCommand(val value: String) {

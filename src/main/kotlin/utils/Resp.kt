@@ -8,6 +8,7 @@ class Resp {
         val PING = "PING"
         val OUTOFINDEX = "$-1\r\n"
         val ERR = "-ERR\r\n"
+        val STREAM = "stream"
 
         fun simpleString(value: String): String {
             return "+${value}\r\n"

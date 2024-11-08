@@ -130,21 +130,41 @@ class Connection {
 
                         outputClient.write(Resp.integer(numReplicaAcked).toByteArray())
                     } else if (requestParts[0].uppercase() == Command.TYPE.value) {
+                        // val key = requestParts[1]
+                        // var res : String? = null
+
+                        // if(DBConfig.isConfigured) {
+                        //     res = RDB().getValue(requestParts[1])
+                        // } else {
+                        //     res = Storage.get(requestParts[1])
+                        // }
+
+                        // if (res == null) {
+                        //     outputClient.write(Resp.simpleString(Resp.NONE).toByteArray())
+                        // } else {
+                        //     outputClient.write(Resp.simpleString(Resp.STRING).toByteArray())
+                        // }
                         val key = requestParts[1]
-                        var res : String? = null
+                        val type = Storage.getType(key)
+                        outputClient.write(Resp.simpleString(type).toByteArray())
 
-                        if(DBConfig.isConfigured) {
-                            res = RDB().getValue(requestParts[1])
-                        } else {
-                            res = Storage.get(requestParts[1])
+                    } else if (requestParts[0].uppercase() == Command.XADD.value) {
+                        val keyName  = requestParts[1]
+
+                        val entryId  = requestParts[2]
+
+                        val tempHashMap = HashMap<String, String>()
+
+                        var i = 3
+
+                        while(i < requestParts.size) {
+                            tempHashMap[requestParts[i]] = requestParts[i+1]
+                            i+=2
                         }
 
-                        if (res == null) {
-                            outputClient.write(Resp.simpleString(Resp.NONE).toByteArray())
-                        } else {
-                            outputClient.write(Resp.simpleString(Resp.STRING).toByteArray())
-                        }
+                        val res = Storage.handleXadd(keyName, entryId ,tempHashMap)
 
+                        outputClient.write(Resp.bulkString(res).toByteArray())
                     }
 
                     outputClient.flush()
