@@ -71,7 +71,7 @@ object Storage {
 
     fun handleXadd(key: String, id: String, fields : HashMap<String, String>) : String{
 
-        syncronized(storage) {
+        synchronized(storage) {
             val item = storage[key]
 
             if (item is RedisValue.StringValue) {
