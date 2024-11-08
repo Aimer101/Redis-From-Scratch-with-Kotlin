@@ -26,15 +26,14 @@ object ReplicaService {
             argLen = 5
         }
 
-        var command = "*${argLen}\r\n" +  // Number of elements in the array
-        "$3\r\nSET\r\n" +  // SET command
-        "$${key.length}\r\n${key}\r\n" +  // Key
-        "$${value.length}\r\n${value}\r\n"      // Value
+        val commandArr = arrayListOf("SET", key, value)
 
         if (expire != null) {
-            command += "$2\r\npx\r\n"
-            command += "$${expire.toString().length}\r\n${expire.toString()}\r\n"
+            commandArr.add("px")
+            commandArr.add(expire.toString())
         }
+
+        val command = Resp.fromArrayString(commandArr)
 
         lock.lock()
         try {
@@ -63,7 +62,9 @@ object ReplicaService {
         // this command can only be invoke if previous command is a SET
         if (isLatestCommandEqualToSet.get()) {
 
-            val command = "*3\r\n$8\r\nREPLCONF\r\n$6\r\nGETACK\r\n$1\r\n*\r\n"
+            val commandArr = arrayListOf("REPLCONF", "GETACK", "*")
+
+            val command = Resp.fromArrayString(commandArr)
 
             lock.lock()
             try {

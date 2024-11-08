@@ -19,11 +19,6 @@ object ReplicaClient {
         outputClient    = PrintWriter(socket.getOutputStream(), true)
         request         = BufferedReader(InputStreamReader(socket.getInputStream()))
 
-        // Thread{
-        //     processQueue()
-        // }.start()
-
-
         Thread {
             ping()
             replconf()
@@ -103,7 +98,8 @@ object ReplicaClient {
                     } else if (commandParts[0].uppercase() == Command.REPLCONF.value) {
                         if (commandParts[1].uppercase() == ArgCommand.GETACK.value) {
 
-                            outputClient.print("*3\r\n$8\r\nREPLCONF\r\n$3\r\nACK\r\n$${offset.toString().length}\r\n${offset.toString()}\r\n")
+                            val commandArr = arrayListOf("REPLCONF", "ACK", offset.toString())
+                            outputClient.print(Resp.fromArrayString(commandArr))
                             outputClient.flush()
                         }
 
@@ -116,7 +112,8 @@ object ReplicaClient {
 
     private fun ping () {
         logPropagationWithTimestamp("Sending ping to master")
-        outputClient.print("*1\r\n$4\r\nPING\r\n")
+
+        outputClient.print(Resp.fromArrayString(arrayListOf("PING")))
         outputClient.flush()
         logPropagationWithTimestamp("Ping sent to master")
 
@@ -126,16 +123,22 @@ object ReplicaClient {
 
     private fun replconf() {
         logPropagationWithTimestamp("Sending replconf 1 to master")
-        outputClient.print("*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$4\r\n6380\r\n")
+
+        val commandArrOne = arrayListOf("REPLCONF", "listening-port", "6380")
+        outputClient.print(Resp.fromArrayString(commandArrOne))
         outputClient.flush()
+
         logPropagationWithTimestamp("Replconf 1 sent to master")
 
         var response = request.readLine()
         logPropagationWithTimestamp("Response from master for replconf 1: $response")
 
         logPropagationWithTimestamp("Sending replconf 2 to master")
-        outputClient.print("*3\r\n$8\r\nREPLCONF\r\n$4\r\ncapa\r\n$6\r\npsync2\r\n")
+
+        val commandArrTwo = arrayListOf("REPLCONF", "capa", "psync2")
+        outputClient.print(Resp.fromArrayString(commandArrTwo))
         outputClient.flush()
+
         logPropagationWithTimestamp("Replconf 2 sent to master")
 
         response = request.readLine()
@@ -144,7 +147,9 @@ object ReplicaClient {
 
     private fun psync() {
         logPropagationWithTimestamp("Sending psync to master")
-        outputClient.print("*3\r\n$5\r\nPSYNC\r\n$1\r\n?\r\n$2\r\n-1\r\n")
+
+        val commandArr = arrayListOf("PSYNC", "?", "-1")
+        outputClient.print(Resp.fromArrayString(commandArr))
         outputClient.flush()
         logPropagationWithTimestamp("Psync sent to master")
         isReady = true

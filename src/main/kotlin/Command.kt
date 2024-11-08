@@ -8,7 +8,8 @@ enum class Command(val value: String) {
     INFO("INFO"),
     REPLCONF("REPLCONF"),
     PSYNC("PSYNC"),
-    WAIT("WAIT")
+    WAIT("WAIT"),
+    TYPE("TYPE"),
 
 }
 
