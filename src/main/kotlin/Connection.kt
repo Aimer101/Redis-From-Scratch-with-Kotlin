@@ -153,18 +153,24 @@ class Connection {
 
                         val entryId  = requestParts[2]
 
-                        val tempHashMap = HashMap<String, String>()
+                        val validationResult = Storage.validateStreamId(keyName, entryId)
 
-                        var i = 3
+                        if (validationResult != null) {
+                            outputClient.write(validationResult.toByteArray())
+                        } else {
+                            val tempHashMap = HashMap<String, String>()
 
-                        while(i < requestParts.size) {
-                            tempHashMap[requestParts[i]] = requestParts[i+1]
-                            i+=2
+                            var i = 3
+
+                            while(i < requestParts.size) {
+                                tempHashMap[requestParts[i]] = requestParts[i+1]
+                                i+=2
+                            }
+
+                            val res = Storage.handleXadd(keyName, entryId ,tempHashMap)
+
+                            outputClient.write(Resp.bulkString(res).toByteArray())
                         }
-
-                        val res = Storage.handleXadd(keyName, entryId ,tempHashMap)
-
-                        outputClient.write(Resp.bulkString(res).toByteArray())
                     }
 
                     outputClient.flush()

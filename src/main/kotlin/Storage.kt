@@ -40,12 +40,43 @@ object Storage {
         return null
     }
 
+    fun validateStreamId(key: String, id: String) : String? {
+        val item = storage[key]
+
+
+        if (item is RedisValue.StreamValue) {
+            val requestedCounterNum = id.split("-")[1].toInt()
+            val requestedMilisecondNum = id.split("-")[0].toInt()
+
+            if(requestedCounterNum == 0) {
+                return Resp.simpleError("The ID specified in XADD must be greater than 0-0")
+            }
+
+            if (!item.entries.isEmpty()) {
+                val currentCounterNum   = item.entries.last().id.split("-")[1].toInt()
+                val currentMilisecondNum = item.entries.last().id.split("-")[0].toInt()
+
+                if(requestedCounterNum <= currentCounterNum) {
+                    return Resp.simpleError("The ID specified in XADD is equal or smaller than the target stream top item")
+                }
+
+                if(requestedMilisecondNum < currentMilisecondNum) {
+                    return Resp.simpleError("The ID specified in XADD is equal or smaller than the target stream top item")
+                }
+            }
+        }
+
+        return null
+    }
+
     fun handleXadd(key: String, id: String, fields : HashMap<String, String>) : String{
         val item = storage[key]
 
         if (item is RedisValue.StringValue) {
             throw Exception("WRONGTYPE Operation against a key holding the wrong kind of value")
-        } else if (item is RedisValue.StreamValue) {
+        }
+
+        if (item is RedisValue.StreamValue) {
             item.entries.add(StreamEntry(id, fields))
         } else {
             storage[key] = RedisValue.StreamValue(mutableListOf(StreamEntry(id, fields)))

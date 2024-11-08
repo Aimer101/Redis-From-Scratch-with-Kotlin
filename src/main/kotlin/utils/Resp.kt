@@ -31,5 +31,9 @@ class Resp {
 
             return result
         }
+
+        fun simpleError(value: String): String {
+            return "-ERR ${value}\r\n"
+        }
     }
 }
