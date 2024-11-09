@@ -56,6 +56,10 @@ class Resp {
         }
 
         fun forXReadPayload(keys:List<String>, arr : ArrayList<ArrayList<StreamEntry>>) : String {
+            if(arr[0].isEmpty()) {
+                return OUTOFINDEX
+            }
+            
             var result = "*${keys.size}\r\n"
 
             for ( i in 0 until keys.size) {

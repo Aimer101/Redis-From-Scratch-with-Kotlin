@@ -171,17 +171,42 @@ class Connection {
                         outputClient.write(Resp.forXRangePayload(res).toByteArray())
                     } else if (requestParts[0].uppercase() == Command.XREAD.value) {
                         // take from index 2 to end
-                        val args = requestParts.subList(2, requestParts.size)
 
-                        val midPoint = args.size / 2
+                        if(requestParts[1].uppercase() == ArgCommand.STREAMS.value) {
+                            val args = requestParts.subList(2, requestParts.size)
 
-                        // names is up to args array
-                        val keyNames = args.subList(0, midPoint)
-                        val entryIds = args.subList(midPoint, args.size)
+                            val midPoint = args.size / 2
 
-                        val res = Storage.handleXRead(keyNames, entryIds)
+                            // names is up to args array
+                            val keyNames = args.subList(0, midPoint)
+                            val entryIds = args.subList(midPoint, args.size)
 
-                        outputClient.write(Resp.forXReadPayload(keyNames,res).toByteArray())
+                            val res = Storage.handleXRead(keyNames, entryIds)
+
+                            outputClient.write(Resp.forXReadPayload(keyNames,res).toByteArray())
+                        } else if (requestParts[1].uppercase() == ArgCommand.BLOCK.value) {
+                            logWithTimestamp("Sleeping for ${requestParts[2]}")
+
+                            val startTime   = System.currentTimeMillis()
+                            val timeOut     = requestParts[2].toLong()
+
+                            val args = requestParts.subList(4, requestParts.size)
+
+                            val midPoint = args.size / 2
+
+                            // names is up to args array
+                            val keyNames = args.subList(0, midPoint)
+                            val entryIds = args.subList(midPoint, args.size)
+
+                            var res = Storage.handleXRead(keyNames, entryIds)
+
+                            while(System.currentTimeMillis() - startTime <= timeOut) {
+                                res = Storage.handleXRead(keyNames, entryIds)
+                            }
+
+                            outputClient.write(Resp.forXReadPayload(keyNames,res).toByteArray())
+
+                        }
                     }
 
                     outputClient.flush()

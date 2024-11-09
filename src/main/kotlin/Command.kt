@@ -20,4 +20,6 @@ enum class ArgCommand(val value: String) {
     REPLICATION("REPLICATION"),
     GETACK("GETACK"),
     ACK("ACK"),
+    STREAMS("STREAMS"),
+    BLOCK("BLOCK"),
 }

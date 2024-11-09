@@ -189,7 +189,6 @@ object Storage {
                     val entryCounter   = entry.id.split("-")[1].toInt()
 
                     if((entryTimemilis > requestedTimeMilis) || (entryTimemilis == requestedTimeMilis && entryCounter > requestCounter)) {
-                        logWithTimestamp("added entry ${entry.id}")
                         tempArr.add(entry)
                     }
                 }
