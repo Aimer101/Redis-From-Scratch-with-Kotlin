@@ -40,6 +40,16 @@ object Storage {
         return null
     }
 
+    fun getStreamEntries(key: String): MutableList<StreamEntry>? {
+        val item = storage[key]
+
+        if(item is RedisValue.StreamValue) {
+            return item.entries
+        }
+
+        return null
+    }
+
     fun validateStreamId(key: String, id: String) : String? {
         val item = storage[key]
 
@@ -48,7 +58,6 @@ object Storage {
             var rawRequestedCounterNum = id.split("-")[1]
 
             if(rawRequestedCounterNum == "*") {
-                logWithTimestamp("Requested counter number is *")
                 return null
             }
 
@@ -137,9 +146,6 @@ object Storage {
             endId = "${endId}-0"
         }
 
-        logWithTimestamp("start: $start, end: $end")
-        logWithTimestamp("startId: $startId, endId: $endId")
-
         synchronized(storage) {
             val item = storage[key]
 
@@ -177,23 +183,33 @@ object Storage {
             for(i in 0 until keys.size) {
                 val key = keys[i]
                 val entryId = entryIds[i]
-                val requestedTimeMilis = entryId.split("-")[0].toInt()
-                val requestCounter   = entryId.split("-")[1].toInt()
-
                 val item = storage[key]
-
                 val tempArr = ArrayList<StreamEntry>()
 
-                for(entry in (item as RedisValue.StreamValue).entries) {
-                    val entryTimemilis = entry.id.split("-")[0].toInt()
-                    val entryCounter   = entry.id.split("-")[1].toInt()
-
-                    if((entryTimemilis > requestedTimeMilis) || (entryTimemilis == requestedTimeMilis && entryCounter > requestCounter)) {
+                if(entryId == "$") {
+                    for(entry in (item as RedisValue.StreamValue).entries) {
                         tempArr.add(entry)
                     }
+                } else {
+                    val requestedTimeMilis = entryId.split("-")[0].toInt()
+                    val requestCounter   = entryId.split("-")[1].toInt()
+
+                    for(entry in (item as RedisValue.StreamValue).entries) {
+                        val entryTimemilis = entry.id.split("-")[0].toInt()
+                        val entryCounter   = entry.id.split("-")[1].toInt()
+
+                        if((entryTimemilis > requestedTimeMilis) || (entryTimemilis == requestedTimeMilis && entryCounter > requestCounter)) {
+                            tempArr.add(entry)
+                        }
+                    }
+
                 }
 
                 result.add(tempArr)
+
+
+
+
             }
         }
 

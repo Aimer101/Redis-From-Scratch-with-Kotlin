@@ -170,7 +170,6 @@ class Connection {
 
                         outputClient.write(Resp.forXRangePayload(res).toByteArray())
                     } else if (requestParts[0].uppercase() == Command.XREAD.value) {
-                        // take from index 2 to end
 
                         if(requestParts[1].uppercase() == ArgCommand.STREAMS.value) {
                             val args = requestParts.subList(2, requestParts.size)
@@ -180,6 +179,7 @@ class Connection {
                             // names is up to args array
                             val keyNames = args.subList(0, midPoint)
                             val entryIds = args.subList(midPoint, args.size)
+
 
                             val res = Storage.handleXRead(keyNames, entryIds)
 
@@ -196,9 +196,25 @@ class Connection {
 
                             // names is up to args array
                             val keyNames = args.subList(0, midPoint)
-                            val entryIds = args.subList(midPoint, args.size)
+                            var entryIds = ArrayList(args.subList(midPoint, args.size))
 
-                            var res = Storage.handleXRead(keyNames, entryIds)
+                            for(i in 0 until keyNames.size) {
+                                val key = keyNames[i]
+                                val entryId = entryIds[i]
+
+                                if(entryId == "$") {
+                                    val streamEntries = Storage.getStreamEntries(key)
+
+                                    if(streamEntries != null) {
+
+                                        if(!streamEntries.isEmpty()) {
+                                            entryIds[i] = streamEntries.last().id
+                                        }
+                                    }
+                                }
+                            }
+
+                            var res = Storage.handleXRead(keyNames, entryIds.toList())
 
                             if(timeOut == 0L) {
                                 while(res[0].isEmpty()) {
@@ -210,7 +226,6 @@ class Connection {
                                     res = Storage.handleXRead(keyNames, entryIds)
                                 }
                             }
-
 
                             outputClient.write(Resp.forXReadPayload(keyNames,res).toByteArray())
 
