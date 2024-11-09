@@ -55,11 +55,17 @@ class Resp {
             return result
         }
 
-        fun forXReadPayload(key:String, arr : ArrayList<StreamEntry>) : String {
-            var result = "*1\r\n"
-            result += "*2\r\n"
-            result += bulkString(key)
-            result += forXRangePayload(arr)
+        fun forXReadPayload(keys:List<String>, arr : ArrayList<ArrayList<StreamEntry>>) : String {
+            var result = "*${keys.size}\r\n"
+
+            for ( i in 0 until keys.size) {
+                val key = keys[i]
+                val entry = arr[i]
+
+                result += "*2\r\n"
+                result += bulkString(key)
+                result += forXRangePayload(entry)
+            }
 
             return result
         }

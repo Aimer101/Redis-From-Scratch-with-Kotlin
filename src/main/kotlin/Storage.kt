@@ -169,23 +169,32 @@ object Storage {
         return result
     }
 
-    fun handleXRead(key: String, entryId: String) : ArrayList<StreamEntry> {
-        val result = ArrayList<StreamEntry>()
-
-        val requestedTimeMilis = entryId.split("-")[0].toInt()
-        val requestCounter   = entryId.split("-")[1].toInt()
+    fun handleXRead(keys: List<String>, entryIds: List<String>) : ArrayList<ArrayList<StreamEntry>> {
+        val result = ArrayList<ArrayList<StreamEntry>>()
 
         synchronized(storage) {
-            val item = storage[key]
 
-            for(entry in (item as RedisValue.StreamValue).entries) {
-                val entryTimemilis = entry.id.split("-")[0].toInt()
-                val entryCounter   = entry.id.split("-")[1].toInt()
+            for(i in 0 until keys.size) {
+                val key = keys[i]
+                val entryId = entryIds[i]
+                val requestedTimeMilis = entryId.split("-")[0].toInt()
+                val requestCounter   = entryId.split("-")[1].toInt()
 
-                if((entryTimemilis > requestedTimeMilis) || (entryTimemilis == requestedTimeMilis && entryCounter > requestCounter)) {
-                    logWithTimestamp("added entry ${entry.id}")
-                    result.add(entry)
+                val item = storage[key]
+
+                val tempArr = ArrayList<StreamEntry>()
+
+                for(entry in (item as RedisValue.StreamValue).entries) {
+                    val entryTimemilis = entry.id.split("-")[0].toInt()
+                    val entryCounter   = entry.id.split("-")[1].toInt()
+
+                    if((entryTimemilis > requestedTimeMilis) || (entryTimemilis == requestedTimeMilis && entryCounter > requestCounter)) {
+                        logWithTimestamp("added entry ${entry.id}")
+                        tempArr.add(entry)
+                    }
                 }
+
+                result.add(tempArr)
             }
         }
 

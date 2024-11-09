@@ -170,12 +170,18 @@ class Connection {
 
                         outputClient.write(Resp.forXRangePayload(res).toByteArray())
                     } else if (requestParts[0].uppercase() == Command.XREAD.value) {
-                        val keyName     = requestParts[2]
-                        val entryId     = requestParts[3]
+                        // take from index 2 to end
+                        val args = requestParts.subList(2, requestParts.size)
 
-                        val res = Storage.handleXRead(keyName, entryId)
+                        val midPoint = args.size / 2
 
-                        outputClient.write(Resp.forXReadPayload(keyName,res).toByteArray())
+                        // names is up to args array
+                        val keyNames = args.subList(0, midPoint)
+                        val entryIds = args.subList(midPoint, args.size)
+
+                        val res = Storage.handleXRead(keyNames, entryIds)
+
+                        outputClient.write(Resp.forXReadPayload(keyNames,res).toByteArray())
                     }
 
                     outputClient.flush()
