@@ -130,20 +130,6 @@ class Connection {
 
                         outputClient.write(Resp.integer(numReplicaAcked).toByteArray())
                     } else if (requestParts[0].uppercase() == Command.TYPE.value) {
-                        // val key = requestParts[1]
-                        // var res : String? = null
-
-                        // if(DBConfig.isConfigured) {
-                        //     res = RDB().getValue(requestParts[1])
-                        // } else {
-                        //     res = Storage.get(requestParts[1])
-                        // }
-
-                        // if (res == null) {
-                        //     outputClient.write(Resp.simpleString(Resp.NONE).toByteArray())
-                        // } else {
-                        //     outputClient.write(Resp.simpleString(Resp.STRING).toByteArray())
-                        // }
                         val key = requestParts[1]
                         val type = Storage.getType(key)
                         outputClient.write(Resp.simpleString(type).toByteArray())
@@ -151,7 +137,11 @@ class Connection {
                     } else if (requestParts[0].uppercase() == Command.XADD.value) {
                         val keyName  = requestParts[1]
 
-                        val entryId  = requestParts[2]
+                        var entryId  = requestParts[2]
+
+                        if (entryId == "*") {
+                            entryId = "${System.currentTimeMillis()}-*"
+                        }
 
                         val validationResult = Storage.validateStreamId(keyName, entryId)
 
