@@ -143,7 +143,7 @@ object Storage {
         synchronized(storage) {
             val item = storage[key]
 
-            var isInRange = false
+            var isInRange = if (startId == "-") true else false
 
             for(entry in (item as RedisValue.StreamValue).entries) {
                 if(entry.id == startId) {
@@ -154,6 +154,10 @@ object Storage {
 
                 if(isInRange) {
                     result.add(entry)
+                }
+
+                if(endId == "+") {
+                    continue
                 }
 
                 if(entry.id == endId) {
