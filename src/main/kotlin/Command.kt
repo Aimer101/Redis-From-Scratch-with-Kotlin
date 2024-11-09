@@ -12,6 +12,7 @@ enum class Command(val value: String) {
     TYPE("TYPE"),
     XADD("XADD"),
     XRANGE("XRANGE"),
+    XREAD("XREAD"),
 }
 
 enum class ArgCommand(val value: String) {

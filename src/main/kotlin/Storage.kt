@@ -167,7 +167,29 @@ object Storage {
         }
 
         return result
+    }
 
+    fun handleXRead(key: String, entryId: String) : ArrayList<StreamEntry> {
+        val result = ArrayList<StreamEntry>()
+
+        val requestedTimeMilis = entryId.split("-")[0].toInt()
+        val requestCounter   = entryId.split("-")[1].toInt()
+
+        synchronized(storage) {
+            val item = storage[key]
+
+            for(entry in (item as RedisValue.StreamValue).entries) {
+                val entryTimemilis = entry.id.split("-")[0].toInt()
+                val entryCounter   = entry.id.split("-")[1].toInt()
+
+                if((entryTimemilis > requestedTimeMilis) || (entryTimemilis == requestedTimeMilis && entryCounter > requestCounter)) {
+                    logWithTimestamp("added entry ${entry.id}")
+                    result.add(entry)
+                }
+            }
+        }
+
+        return result
     }
 
     fun getType(key: String): String {

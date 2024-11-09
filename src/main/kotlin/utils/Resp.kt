@@ -36,7 +36,7 @@ class Resp {
             return "-ERR ${value}\r\n"
         }
 
-        fun fromStreamValues(arr : ArrayList<StreamEntry>) : String {
+        fun forXRangePayload(arr : ArrayList<StreamEntry>) : String {
             var result = "*${arr.size}\r\n"
 
             for(entry in arr) {
@@ -51,6 +51,15 @@ class Resp {
                     result += bulkString(field.value)
                 }
             }
+
+            return result
+        }
+
+        fun forXReadPayload(key:String, arr : ArrayList<StreamEntry>) : String {
+            var result = "*1\r\n"
+            result += "*2\r\n"
+            result += bulkString(key)
+            result += forXRangePayload(arr)
 
             return result
         }
