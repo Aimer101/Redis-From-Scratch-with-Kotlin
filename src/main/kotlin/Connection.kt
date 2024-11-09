@@ -232,9 +232,14 @@ class Connection {
                         }
                     } else if (requestParts[0].uppercase() == Command.INCR.value) {
                             val key = requestParts[1]
-                            val res = Storage.handleIncrement(key)
 
-                            outputClient.write(Resp.integer(res).toByteArray())
+                            try {
+                                val res = Storage.handleIncrement(key)
+                                outputClient.write(Resp.integer(res).toByteArray())
+                            } catch (e: Exception) {
+                                outputClient.write(Resp.simpleError(e.message!!).toByteArray())
+                            }
+
 
                         }
 

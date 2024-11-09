@@ -221,7 +221,11 @@ object Storage {
             val item = storage[key]
 
             if (item is RedisValue.StringValue) {
-                val value = (item as RedisValue.StringValue).value.toInt()
+                val value = (item as RedisValue.StringValue).value.toIntOrNull()
+
+                if (value == null) {
+                    throw Exception("value is not an integer or out of range")
+                }
                 storage[key] = RedisValue.StringValue((value + 1).toString())
                 return value + 1
             }
