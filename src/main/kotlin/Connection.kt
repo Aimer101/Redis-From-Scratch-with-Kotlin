@@ -200,9 +200,17 @@ class Connection {
 
                             var res = Storage.handleXRead(keyNames, entryIds)
 
-                            while(System.currentTimeMillis() - startTime <= timeOut) {
-                                res = Storage.handleXRead(keyNames, entryIds)
+                            if(timeOut == 0L) {
+                                while(res[0].isEmpty()) {
+                                    res = Storage.handleXRead(keyNames, entryIds)
+                                }
+
+                            } else {
+                                while(System.currentTimeMillis() - startTime <= timeOut) {
+                                    res = Storage.handleXRead(keyNames, entryIds)
+                                }
                             }
+
 
                             outputClient.write(Resp.forXReadPayload(keyNames,res).toByteArray())
 
