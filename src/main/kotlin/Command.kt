@@ -14,6 +14,7 @@ enum class Command(val value: String) {
     XRANGE("XRANGE"),
     XREAD("XREAD"),
     INCR("INCR"),
+    MULTI("MULTI"),
 }
 
 enum class ArgCommand(val value: String) {

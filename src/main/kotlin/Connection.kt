@@ -241,10 +241,12 @@ class Connection {
                             }
 
 
-                        }
+                    }else if (requestParts[0].uppercase() == Command.MULTI.value) {
+                        outputClient.write(Resp.simpleString(Resp.OK).toByteArray())
+                    }
 
                     outputClient.flush()
-                }
+                } 
             }
         } catch (e: Exception) {
             logWithTimestamp("Error handling client: ${e.message}")
