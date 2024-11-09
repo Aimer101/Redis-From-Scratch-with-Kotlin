@@ -230,7 +230,13 @@ class Connection {
                             outputClient.write(Resp.forXReadPayload(keyNames,res).toByteArray())
 
                         }
-                    }
+                    } else if (requestParts[0].uppercase() == Command.INCR.value) {
+                            val key = requestParts[1]
+                            val res = Storage.handleIncrement(key)
+
+                            outputClient.write(Resp.integer(res).toByteArray())
+
+                        }
 
                     outputClient.flush()
                 }

@@ -216,6 +216,21 @@ object Storage {
         return result
     }
 
+    fun handleIncrement(key: String) : Int {
+        synchronized(storage) {
+            val item = storage[key]
+
+            if (item is RedisValue.StringValue) {
+                val value = (item as RedisValue.StringValue).value.toInt()
+                storage[key] = RedisValue.StringValue((value + 1).toString())
+                return value + 1
+            }
+
+            storage[key] = RedisValue.StringValue("1")
+            return 1
+        }
+    }
+
     fun getType(key: String): String {
         val item = storage[key]
 

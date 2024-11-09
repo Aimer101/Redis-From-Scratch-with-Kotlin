@@ -13,6 +13,7 @@ enum class Command(val value: String) {
     XADD("XADD"),
     XRANGE("XRANGE"),
     XREAD("XREAD"),
+    INCR("INCR"),
 }
 
 enum class ArgCommand(val value: String) {
