@@ -161,6 +161,14 @@ class Connection {
 
                             outputClient.write(Resp.bulkString(res).toByteArray())
                         }
+                    } else if (requestParts[0].uppercase() == Command.XRANGE.value) {
+                        val keyName     = requestParts[1]
+                        val start       = requestParts[2]
+                        val end         = requestParts[3]
+
+                        val res = Storage.handleXRange(keyName, start, end)
+
+                        outputClient.write(Resp.fromStreamValues(res).toByteArray())
                     }
 
                     outputClient.flush()

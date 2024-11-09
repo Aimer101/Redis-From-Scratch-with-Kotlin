@@ -11,6 +11,7 @@ enum class Command(val value: String) {
     WAIT("WAIT"),
     TYPE("TYPE"),
     XADD("XADD"),
+    XRANGE("XRANGE"),
 }
 
 enum class ArgCommand(val value: String) {

@@ -123,6 +123,49 @@ object Storage {
         }
     }
 
+    fun handleXRange(key: String, start: String, end: String) : ArrayList<StreamEntry> {
+        var startId = start
+        var endId   = end
+
+        val result = ArrayList<StreamEntry>()
+
+        if(startId.split("-").size != 2) {
+            startId = "${startId}-0"
+        }
+
+        if(endId.split("-").size != 2) {
+            endId = "${endId}-0"
+        }
+
+        logWithTimestamp("start: $start, end: $end")
+        logWithTimestamp("startId: $startId, endId: $endId")
+
+        synchronized(storage) {
+            val item = storage[key]
+
+            var isInRange = false
+
+            for(entry in (item as RedisValue.StreamValue).entries) {
+                if(entry.id == startId) {
+                    isInRange = true
+                    result.add(entry)
+                    continue
+                }
+
+                if(isInRange) {
+                    result.add(entry)
+                }
+
+                if(entry.id == endId) {
+                    break
+                }
+            }
+        }
+
+        return result
+
+    }
+
     fun getType(key: String): String {
         val item = storage[key]
 

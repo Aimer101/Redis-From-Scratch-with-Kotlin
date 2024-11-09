@@ -35,5 +35,24 @@ class Resp {
         fun simpleError(value: String): String {
             return "-ERR ${value}\r\n"
         }
+
+        fun fromStreamValues(arr : ArrayList<StreamEntry>) : String {
+            var result = "*${arr.size}\r\n"
+
+            for(entry in arr) {
+                result += "*2\r\n"
+                result += bulkString(entry.id)
+
+                result += "*${entry.fields.size}\r\n"
+
+                // iterate over fields
+                for(field in entry.fields) {
+                    result += bulkString(field.key)
+                    result += bulkString(field.value)
+                }
+            }
+
+            return result
+        }
     }
 }
