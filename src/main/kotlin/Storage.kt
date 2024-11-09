@@ -45,10 +45,16 @@ object Storage {
 
 
         if (item is RedisValue.StreamValue) {
-            val requestedCounterNum = id.split("-")[1].toInt()
             val requestedMilisecondNum = id.split("-")[0].toInt()
+            var requestedCounterNum = id.split("-")[1].toInt()
 
-            if(requestedCounterNum == 0) {
+            if(requestedCounterNum == "*") {
+                return null
+            }
+
+            requestedCounterNum = requestedCounterNum.toInt()
+
+            if(requestedCounterNum == 0 && requestedMilisecondNum == 0) {
                 return Resp.simpleError("The ID specified in XADD must be greater than 0-0")
             }
 
@@ -69,6 +75,7 @@ object Storage {
         return null
     }
 
+
     fun handleXadd(key: String, id: String, fields : HashMap<String, String>) : String{
 
         synchronized(storage) {
@@ -78,10 +85,35 @@ object Storage {
                 throw Exception("WRONGTYPE Operation against a key holding the wrong kind of value")
             }
 
+            val currentMilisNum     = id.split("-")[0]
+            val currentCounterNum   = id.split("-")[1]
+            var entryId             = id
+
+            if (currentCounterNum == "*") {
+                // edge case is when timemilis is 0, then counter cannot be 0
+                var minCounterNum = 1
+
+                if(currentMilisNum != "0") {
+                    minCounterNum = 0
+                }
+
+                if(storage[key] == null) {
+                    entryId = "$currentMilisNum-$minCounterNum"
+                } else {
+                    if(storage[key].entries.isEmpty()) {
+                        entryId = "$currentMilisNum-$minCounterNum"
+                    } else {
+                        val lastEntryId = storage[key].entries.last().id
+                        val lastEntryIdCounterNum = lastEntryId.split("-")[1].toInt()
+                        entryId = "$currentMilisNum-${lastEntryIdCounterNum + 1}"
+                    }
+                }
+            }
+
             if (item is RedisValue.StreamValue) {
-                item.entries.add(StreamEntry(id, fields))
+                item.entries.add(StreamEntry(entryId, fields))
             } else {
-                storage[key] = RedisValue.StreamValue(mutableListOf(StreamEntry(id, fields)))
+                storage[key] = RedisValue.StreamValue(mutableListOf(StreamEntry(entryId, fields)))
             }
 
             return id
