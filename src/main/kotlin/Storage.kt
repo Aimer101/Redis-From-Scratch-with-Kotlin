@@ -43,16 +43,16 @@ object Storage {
     fun validateStreamId(key: String, id: String) : String? {
         val item = storage[key]
 
-
         if (item is RedisValue.StreamValue) {
             val requestedMilisecondNum = id.split("-")[0].toInt()
-            var requestedCounterNum = id.split("-")[1].toInt()
+            var rawRequestedCounterNum = id.split("-")[1]
 
-            if(requestedCounterNum == "*") {
+            if(rawRequestedCounterNum == "*") {
+                logWithTimestamp("Requested counter number is *")
                 return null
             }
 
-            requestedCounterNum = requestedCounterNum.toInt()
+            val requestedCounterNum = rawRequestedCounterNum.toInt()
 
             if(requestedCounterNum == 0 && requestedMilisecondNum == 0) {
                 return Resp.simpleError("The ID specified in XADD must be greater than 0-0")
@@ -100,14 +100,17 @@ object Storage {
                 if(storage[key] == null) {
                     entryId = "$currentMilisNum-$minCounterNum"
                 } else {
-                    if(storage[key].entries.isEmpty()) {
-                        entryId = "$currentMilisNum-$minCounterNum"
-                    } else {
-                        val lastEntryId = storage[key].entries.last().id
-                        val lastEntryIdCounterNum = lastEntryId.split("-")[1].toInt()
+                    val lastEntryId = (storage[key] as RedisValue.StreamValue).entries.last().id
+                    val lastEntryIdMilisNum = lastEntryId.split("-")[0].toInt()
+                    val lastEntryIdCounterNum = lastEntryId.split("-")[1].toInt()
+
+                    if(lastEntryIdMilisNum == currentMilisNum.toInt()) {
                         entryId = "$currentMilisNum-${lastEntryIdCounterNum + 1}"
+                    } else {
+                        entryId = "$currentMilisNum-0"
                     }
                 }
+
             }
 
             if (item is RedisValue.StreamValue) {
@@ -116,7 +119,7 @@ object Storage {
                 storage[key] = RedisValue.StreamValue(mutableListOf(StreamEntry(entryId, fields)))
             }
 
-            return id
+            return entryId
         }
     }
 
