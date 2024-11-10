@@ -65,7 +65,7 @@ class Connection {
 
                         outputClient.write(Resp.ERR.toByteArray())
 
-                    } else if (isMultiCommand) {
+                    } else if (isMultiCommand && requestParts[0].uppercase() != Command.EXEC.value) {
 
                         messageQueue.add(requestParts)
                         outputClient.write(Resp.simpleString(Resp.QUEUED).toByteArray())
@@ -294,6 +294,7 @@ class Connection {
                             isMultiCommand = false
 
                             val res = executeMessageQueue()
+                            logWithTimestamp("$res")
                             outputClient.write(Resp.fromRespArray(res).toByteArray())
                         }
                     }
