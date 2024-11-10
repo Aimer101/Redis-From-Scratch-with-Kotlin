@@ -1,6 +1,7 @@
 class Resp {
     companion object {
         val OK = "OK"
+        val QUEUED = "QUEUED"
         val ERROR = "-1"
         val STRING = "string"
         val NONE = "none"
@@ -32,6 +33,18 @@ class Resp {
             return result
         }
 
+        fun fromRespArray(arr : ArrayList<String>) : String {
+            var result = "*${arr.size}\r\n"
+
+            for(str in arr) {
+                result += arr
+            }
+
+            return result
+
+
+        }
+
         fun simpleError(value: String): String {
             return "-ERR ${value}\r\n"
         }
@@ -59,7 +72,6 @@ class Resp {
             if(arr[0].isEmpty()) {
                 return OUTOFINDEX
             }
-            
             var result = "*${keys.size}\r\n"
 
             for ( i in 0 until keys.size) {

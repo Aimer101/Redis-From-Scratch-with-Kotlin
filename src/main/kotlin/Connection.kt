@@ -2,12 +2,50 @@ import java.net.Socket
 
 class Connection {
 
+    private val messageQueue = ArrayList<List<String>>(100)
+
+    private fun executeMessageQueue() : ArrayList<String> {
+        val result = ArrayList<String>()
+
+        while(messageQueue.isNotEmpty()) {
+            val requestParts = messageQueue.removeAt(0)
+
+            when(requestParts[0].uppercase()) {
+                Command.SET.value -> {
+                    var expiry: Int? = null
+
+                    if(requestParts.size == 5 && requestParts[4].toIntOrNull() != null && requestParts[3].uppercase() == "PX") {
+                        expiry = requestParts[4].toInt()
+                    }
+
+                    Storage.set(requestParts[1], requestParts[2], expiry)
+
+                    result.add(Resp.OK)
+                }
+
+                Command.INCR.value -> {
+                    val key = requestParts[1]
+
+                    try {
+                        val res = Storage.handleIncrement(key)
+                        result.add(Resp.integer(res))
+                    } catch (e: Exception) {
+                        result.add(Resp.simpleError(e.message!!))
+                    }
+                }
+            }
+        }
+
+        return result
+    }
+
     fun onConnect(socket: Socket) {
         val inputClient = socket.getInputStream()
         val outputClient = socket.getOutputStream()
         var bytesRead: Int
         val buffer = ByteArray(1024);
         var lastWriteMessageOffset = 0L // record offset of the latest write opeartion
+        var isMultiCommand = false
 
         try {
             while(socket.isConnected) {
@@ -26,6 +64,11 @@ class Connection {
                     if(requestParts.isEmpty()) {
 
                         outputClient.write(Resp.ERR.toByteArray())
+
+                    } else if (isMultiCommand) {
+
+                        messageQueue.add(requestParts)
+                        outputClient.write(Resp.simpleString(Resp.QUEUED).toByteArray())
 
                     } else if (requestParts[0].uppercase() == Command.PING.value) {
 
@@ -241,12 +284,22 @@ class Connection {
                             }
 
 
-                    }else if (requestParts[0].uppercase() == Command.MULTI.value) {
+                    } else if (requestParts[0].uppercase() == Command.MULTI.value) {
+                        isMultiCommand = true
                         outputClient.write(Resp.simpleString(Resp.OK).toByteArray())
+                    } else if (requestParts[0].uppercase() == Command.EXEC.value) {
+                        if(!isMultiCommand) {
+                            outputClient.write(Resp.simpleError("EXEC without MULTI").toByteArray())
+                        } else {
+                            isMultiCommand = false
+
+                            val res = executeMessageQueue()
+                            outputClient.write(Resp.fromRespArray(res).toByteArray())
+                        }
                     }
 
                     outputClient.flush()
-                } 
+                }
             }
         } catch (e: Exception) {
             logWithTimestamp("Error handling client: ${e.message}")
