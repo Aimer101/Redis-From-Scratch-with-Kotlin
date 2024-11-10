@@ -2,9 +2,7 @@ import java.net.Socket
 
 class Connection {
 
-    private val messageQueue = ArrayList<List<String>>(100)
-
-    private fun executeMessageQueue() : ArrayList<DecodeValue> {
+    private fun executeMessageQueue(messageQueue: ArrayList<List<String>>) : ArrayList<DecodeValue> {
         val result = ArrayList<DecodeValue>()
 
         while(messageQueue.isNotEmpty()) {
@@ -56,6 +54,7 @@ class Connection {
         val buffer = ByteArray(1024);
         var lastWriteMessageOffset = 0L // record offset of the latest write opeartion
         var isMultiCommand = false
+        val messageQueue = ArrayList<List<String>>(100)
 
         try {
             while(socket.isConnected) {
@@ -90,7 +89,7 @@ class Connection {
                         } else {
                             isMultiCommand = false
 
-                            val res = executeMessageQueue()
+                            val res = executeMessageQueue(messageQueue)
                             logWithTimestamp("$res")
                             outputClient.write(Resp.fromDecodeValueArray(res).toByteArray())
                         }
