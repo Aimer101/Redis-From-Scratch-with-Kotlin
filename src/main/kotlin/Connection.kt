@@ -4,8 +4,8 @@ class Connection {
 
     private val messageQueue = ArrayList<List<String>>(100)
 
-    private fun executeMessageQueue() : ArrayList<String> {
-        val result = ArrayList<String>()
+    private fun executeMessageQueue() : ArrayList<DecodeValue> {
+        val result = ArrayList<DecodeValue>()
 
         while(messageQueue.isNotEmpty()) {
             val requestParts = messageQueue.removeAt(0)
@@ -20,7 +20,7 @@ class Connection {
 
                     Storage.set(requestParts[1], requestParts[2], expiry)
 
-                    result.add(Resp.OK)
+                    result.add(DecodeValue.SimpleStringValue(Resp.OK))
                 }
 
                 Command.INCR.value -> {
@@ -28,9 +28,19 @@ class Connection {
 
                     try {
                         val res = Storage.handleIncrement(key)
-                        result.add(Resp.integer(res))
+                        result.add(DecodeValue.IntegerValue(res))
                     } catch (e: Exception) {
-                        result.add(Resp.simpleError(e.message!!))
+                        result.add(DecodeValue.ErrorValue(e.message!!))
+                    }
+                }
+
+                Command.GET.value -> {
+                    var res : String? = Storage.get(requestParts[1])
+
+                    if(res == null) {
+                        result.add(DecodeValue.OutOfIndex(-1))
+                    } else {
+                        result.add(DecodeValue.BulkStringValue(res))
                     }
                 }
             }
@@ -295,7 +305,7 @@ class Connection {
 
                             val res = executeMessageQueue()
                             logWithTimestamp("$res")
-                            outputClient.write(Resp.fromRespArray(res).toByteArray())
+                            outputClient.write(Resp.fromDecodeValueArray(res).toByteArray())
                         }
                     }
 

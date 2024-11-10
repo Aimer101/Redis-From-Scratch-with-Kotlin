@@ -1,3 +1,12 @@
+sealed class DecodeValue {
+    data class SimpleStringValue(val value:String): DecodeValue()
+    data class BulkStringValue(val value:String): DecodeValue()
+    data class IntegerValue(val value:Int): DecodeValue()
+    data class ErrorValue(val value:String): DecodeValue()
+    data class OutOfIndex(val value: Int) : DecodeValue()
+}
+
+
 class Resp {
     companion object {
         val OK = "OK"
@@ -33,12 +42,25 @@ class Resp {
             return result
         }
 
-        fun fromRespArray(arr : ArrayList<String>) : String {
+        fun fromDecodeValueArray(arr : ArrayList<DecodeValue>) : String {
             var result = "*${arr.size}\r\n"
 
             for(str in arr) {
-                result += arr
+                if(str is DecodeValue.SimpleStringValue) {
+                    result += simpleString(str.value)
+                } else if (str is DecodeValue.BulkStringValue) {
+                    result += bulkString(str.value)
+                } else if (str is DecodeValue.IntegerValue) {
+                    result += integer(str.value)
+                } else if (str is DecodeValue.ErrorValue) {
+                    result += simpleError(str.value)
+                } else if (str is DecodeValue.OutOfIndex) {
+                    result += OUTOFINDEX
+                }
             }
+
+            logWithTimestamp("array is ${arr}")
+            logWithTimestamp("result is ${result}")
 
             return result
 
