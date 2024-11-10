@@ -75,11 +75,28 @@ class Connection {
 
                         outputClient.write(Resp.ERR.toByteArray())
 
-                    } else if (isMultiCommand && requestParts[0].uppercase() != Command.EXEC.value) {
+                    } else if (requestParts[0].uppercase() == Command.DISCARD.value) {
 
+                        if(!isMultiCommand) {
+                            outputClient.write(Resp.simpleError("DISCARD without MULTI").toByteArray())
+                        } else {
+                            isMultiCommand = false
+                            messageQueue.clear()
+                            outputClient.write(Resp.simpleString(Resp.OK).toByteArray())
+                        }
+                    } else if (requestParts[0].uppercase() == Command.EXEC.value) {
+                        if(!isMultiCommand) {
+                            outputClient.write(Resp.simpleError("EXEC without MULTI").toByteArray())
+                        } else {
+                            isMultiCommand = false
+
+                            val res = executeMessageQueue()
+                            logWithTimestamp("$res")
+                            outputClient.write(Resp.fromDecodeValueArray(res).toByteArray())
+                        }
+                    } else if (isMultiCommand) {
                         messageQueue.add(requestParts)
                         outputClient.write(Resp.simpleString(Resp.QUEUED).toByteArray())
-
                     } else if (requestParts[0].uppercase() == Command.PING.value) {
 
                         outputClient.write(Resp.simpleString(Resp.PONG).toByteArray())
@@ -297,16 +314,6 @@ class Connection {
                     } else if (requestParts[0].uppercase() == Command.MULTI.value) {
                         isMultiCommand = true
                         outputClient.write(Resp.simpleString(Resp.OK).toByteArray())
-                    } else if (requestParts[0].uppercase() == Command.EXEC.value) {
-                        if(!isMultiCommand) {
-                            outputClient.write(Resp.simpleError("EXEC without MULTI").toByteArray())
-                        } else {
-                            isMultiCommand = false
-
-                            val res = executeMessageQueue()
-                            logWithTimestamp("$res")
-                            outputClient.write(Resp.fromDecodeValueArray(res).toByteArray())
-                        }
                     }
 
                     outputClient.flush()

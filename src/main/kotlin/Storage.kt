@@ -232,7 +232,6 @@ object Storage {
 
             if (item == null) {
                 storage[key] = RedisValue.StringValue("1")
-                logWithTimestamp("save value that wasnt existed before with key of ${key} and vlaue of 1")
             }
 
             return 1

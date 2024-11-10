@@ -16,6 +16,7 @@ enum class Command(val value: String) {
     INCR("INCR"),
     MULTI("MULTI"),
     EXEC("EXEC"),
+    DISCARD("DISCARD"),
 }
 
 enum class ArgCommand(val value: String) {
